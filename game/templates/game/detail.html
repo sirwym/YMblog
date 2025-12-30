@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ game.title }}{% endblock %}
+
+{% block content %}
+<div class="space-y-8"
+     x-data="{
+        isWebFullscreen: false,
+        copied: false,
+
+        toggleFullscreen() {
+            this.isWebFullscreen = !this.isWebFullscreen;
+        },
+
+        copyLink() {
+            navigator.clipboard.writeText(window.location.href);
+            this.copied = true;
+            setTimeout(() => this.copied = false, 2000);
+        }
+     }"
+     x-init="$watch('isWebFullscreen', value => document.body.style.overflow = value ? 'hidden' : '')"
+     @keydown.escape.window="isWebFullscreen = false">
+
+    <div :class="isWebFullscreen ? 'web-fullscreen-mode' : 'relative rounded-box shadow-2xl -mx-4 md:mx-0'"
+         class="bg-neutral text-neutral-content overflow-hidden transition-all duration-300 ease-in-out">
+
+        <div class="p-4 bg-neutral-focus flex justify-between items-center border-b border-white/10 h-[64px]">
+    <div>
+        <h1 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+            <span class="text-secondary"></span> {{ game.title }}
+        </h1>
+        <p class="text-xs opacity-60 mt-1" x-show="!isWebFullscreen">
+            由 TurboWarp 引擎驱动 · 发布于 {{ game.created_at|date:"Y-m-d" }}
+        </p>
+    </div>
+
+    <div class="flex items-center gap-2">
+
+        {% include "game/partials/like_button.html" %}
+
+        <div class="h-6 w-px bg-white/10 mx-1"></div>
+
+        <button @click="toggleFullscreen"
+                class="btn btn-sm btn-ghost hover:bg-secondary/20 gap-2 group transition-all"
+                title="按 Esc 也可以退出">
+            <template x-if="!isWebFullscreen">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 4l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" /></svg>
+            </template>
+            <template x-if="isWebFullscreen">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </template>
+            <span x-text="isWebFullscreen ? '退出全屏' : '网页全屏'"
+                  class="hidden sm:inline font-bold text-white">
+            </span>
+        </button>
+    </div>
+    </div>
+
+        <div class="game-content-area relative w-full bg-black flex items-center justify-center group"
+             :class="isWebFullscreen ? 'h-[calc(100vh-64px)]' : 'aspect-[4/3] md:aspect-video'">
+
+            <iframe
+                src="{{ game.game_file.url }}"
+                class="w-full h-full border-0"
+                allowtransparency="true"
+                allowfullscreen="true"
+                allow="autoplay; gamepad; microphone; camera"
+                scrolling="no">
+            </iframe>
+
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                <span class="badge badge-lg bg-black/50 text-white border-0 backdrop-blur-sm">
+                    点击画面开始操作
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title text-lg border-l-4 border-primary pl-3 mb-2">游戏简介</h2>
+                    <div class="prose max-w-none text-base-content/80">
+                        {{ game.description|linebreaks }}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+             <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-base mb-4 opacity-70">元数据</h3>
+                    <div class="flex flex-col gap-4">
+                        <div class="flex justify-between items-center pb-2 border-b border-base-content/10">
+                            <span class="text-sm">分类</span>
+                            {% if game.category %}
+                                <span class="badge badge-primary badge-outline">{{ game.category.name }}</span>
+                            {% else %}
+                                <span class="text-xs opacity-50">未分类</span>
+                            {% endif %}
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <span class="text-sm">标签</span>
+                            <div class="flex flex-wrap gap-2">
+                                {% for tag in game.tags.all %}
+                                <span class="badge badge-ghost badge-sm">#{{ tag.name }}</span>
+                                {% empty %}
+                                <span class="text-xs opacity-50">暂无标签</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card bg-base-200">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-sm mb-2">分享给朋友</h3>
+                    <div class="flex gap-2">
+                        <div class="tooltip" :class="copied ? 'tooltip-open tooltip-success' : ''" :data-tip="copied ? '已复制!' : '复制链接'">
+                            <button @click="copyLink" class="btn btn-sm btn-circle btn-ghost">🔗</button>
+                        </div>
+                        <button class="btn btn-sm btn-circle btn-ghost">📱</button>
+                        <a href="{{ game.game_file.url }}" download class="btn btn-sm btn-primary ml-auto">下载 HTML</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

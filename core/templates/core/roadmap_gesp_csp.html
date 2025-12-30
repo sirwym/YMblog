@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}CSP-J/S 双轨学习路线 - {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 pb-20">
+
+   <div class="max-w-7xl mx-auto px-4 pb-20">
+
+    <div class="text-center mb-12 py-10">
+        <div class="badge badge-lg badge-outline font-mono mb-4">NOI & GESP Syllabus</div>
+        <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight mb-4">
+            <span class="text-primary">GESP 考级</span> <span class="text-base-content/30 mx-2">/</span> <span class="text-secondary">CSP 竞赛</span>
+            <br>双轨进阶路线图
+        </h1>
+        <p class="text-base-content/60 max-w-2xl mx-auto">
+            左侧以 GESP 等级为标尺，右侧以 CSP 实战为主线。
+            <br>融合数学基石，构建“编程+数学”螺旋上升的学习路径。
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+
+        <div class="relative">
+            <div class="sticky top-0 z-30 bg-base-100/95 backdrop-blur py-4 mb-8 border-b border-primary/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-8 bg-primary rounded-full"></div>
+                    <h2 class="text-2xl font-bold text-primary">GESP C++ 考级</h2>
+                    <span class="badge badge-primary badge-outline">1-8级</span>
+                </div>
+            </div>
+
+            <div class="space-y-8 pl-6 border-l-2 border-primary/20 ml-4 md:ml-8">
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 一级：编程启蒙" level="Grade 1" diff="⭐" tags="变量 输入输出 算术运算 逻辑判断" desc="掌握编程环境配置。理解变量概念，学会基本的输入输出 (cin/cout) 及基础逻辑 (if/else)。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 二级：逻辑控制" level="Grade 2" diff="⭐" tags="for循环 while循环 ASCII码 流程图" desc="学会指挥计算机做重复的事情。掌握多层循环嵌套，理解字符与整数的关系，能画出简单流程图。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 三级：批量数据" level="Grade 3" diff="⭐⭐" tags="一维数组 字符串 进制转换 位运算" desc="学会处理成百上千的数据。掌握数组操作，理解二进制/十六进制的核心概念与位运算基础。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 四级：模块化与排序" level="Grade 4" diff="⭐⭐" tags="函数 结构体 简单排序 算法复杂度" desc="学会封装代码。掌握 struct 结构体，理解冒泡/选择/插入排序及其时间复杂度 O(n²)。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 五级：算法入门" level="Grade 5" diff="⭐⭐⭐" tags="质数筛 高精度运算 简单递归 杨辉三角" desc="开始接触算法思维。掌握埃氏筛法找质数，学会处理超出 long long 范围的大整数计算。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 六级：综合应用" level="Grade 6" diff="⭐⭐⭐" tags="文件操作 sort排序 贪心算法 二分查找" desc="掌握文件读写 (freopen)。学会利用 sort 自定义排序解决复杂问题，初步掌握贪心与二分策略。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 七级：树与搜索" level="Grade 7" diff="⭐⭐⭐⭐" is_hard=True tags="树的遍历 BFS DFS 贪心进阶" desc="进入非线性数据结构。理解“树”的概念（深度/度/叶子），掌握广搜与深搜的遍历框架。" %}
+
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 八级：图与DP" level="Grade 8" diff="⭐⭐⭐⭐⭐" is_hard=True tags="图的遍历 最长上升子序列 背包问题 并查集" desc="GESP 最高级。掌握图的连通性，熟练运用动态规划解决 LIS、背包等经典模型。" %}
+
+            </div>
+        </div>
+
+
+        <div class="relative mt-12 md:mt-0">
+            <div class="sticky top-0 z-30 bg-base-100/95 backdrop-blur py-4 mb-8 border-b border-secondary/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-3 h-8 bg-secondary rounded-full"></div>
+                    <h2 class="text-2xl font-bold text-secondary">CSP 竞赛 & 数学</h2>
+                    <span class="badge badge-secondary badge-outline">J/S 进阶</span>
+                </div>
+            </div>
+
+            <div class="space-y-8 pl-6 border-l-2 border-secondary/20 ml-4 md:ml-8">
+
+                {% include "core/partials/timeline_node.html" with type="accent" title="【数学】计算机算术" level="Math Base" diff="⭐" tags="二进制 原码补码 逻辑代数" desc="一切算法的底层逻辑。理解计算机为什么用二进制，掌握与、或、非、异或运算。" %}
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="CSP-J 语法与模拟" level="CSP-J" diff="⭐" tags="高精度 模拟法 暴力枚举" desc="CSP-J T1 必考。能够将复杂的题意转化为代码逻辑，处理大整数加减乘除。" %}
+
+                {% include "core/partials/timeline_node.html" with type="accent" title="【数学】初等数论" level="Math J" diff="⭐⭐" tags="质数筛 GCD/LCM 唯一分解" desc="解决整除类问题的钥匙。掌握欧几里得算法，理解质因数分解在解题中的应用。" %}
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="CSP-J 常用算法" level="CSP-J" diff="⭐⭐" tags="二分答案 贪心策略 排序应用" desc="J 组 T2 核心。学会把 O(n) 优化到 O(logn)，理解局部最优如何推导全局最优。" %}
+
+                {% include "core/partials/timeline_node.html" with type="accent" title="【数学】组合计数" level="Math J+" diff="⭐⭐⭐" tags="排列组合 容斥原理 鸽巢原理" desc="初赛必考，DP 基础。掌握插板法、圆排列，理解杨辉三角与组合数的关系。" %}
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="搜索与基础 DP" level="CSP-J" diff="⭐⭐⭐⭐" is_hard=True tags="DFS/BFS 线性DP 背包问题" desc="J 组 T3/T4 分水岭。掌握“不撞南墙不回头”的搜索，理解 DP 的状态转移方程。" %}
+
+                <div class="py-2 flex items-center gap-4 opacity-50">
+                    <div class="h-px bg-base-content/20 flex-1"></div>
+                    <span class="text-xs font-mono font-bold uppercase">CSP-S 提高级</span>
+                    <div class="h-px bg-base-content/20 flex-1"></div>
+                </div>
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="图论基础与进阶" level="CSP-S" diff="⭐⭐⭐⭐" tags="最短路 最小生成树 拓扑排序" desc="S 组核心。熟练掌握 Dijkstra, Floyd, Prim, Kruskal 算法模板，解决交通/网络类问题。" %}
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="图的连通性" level="CSP-S" diff="⭐⭐⭐⭐⭐" is_hard=True tags="Tarjan 割点/割桥 LCA" desc="图论深水区。学会将有环图转化为无环图（DAG），处理树上两点间距离问题。" %}
+
+                {% include "core/partials/timeline_node.html" with type="accent" title="【数学】进阶数论" level="Math S" diff="⭐⭐⭐⭐⭐" tags="同余方程 乘法逆元 矩阵快速幂" desc="优化算法复杂度的神器。掌握费马小定理求逆元，利用矩阵加速递推数列。" %}
+
+                {% include "core/partials/timeline_node.html" with type="secondary" title="高阶 DS 与 DP" level="CSP-S" diff="⭐⭐⭐⭐⭐⭐" is_hard=True tags="线段树 树状数组 区间DP 状压DP" desc="S 组高分关键。处理区间修改查询问题，利用二进制状态压缩解决小数据量复杂问题。" %}
+
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-20 border-t border-base-content/10 pt-8 text-center">
+        <p class="text-sm text-base-content/50 flex items-center justify-center gap-2">
+            注：带 <span class="badge badge-error badge-xs w-2 h-2 p-0 rounded-full"></span> 标记的为高频难点，建议重点突破。
+        </p>
+    </div>
+
+</div>
+{% endblock %}

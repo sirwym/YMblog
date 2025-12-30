@@ -1,0 +1,88 @@
+{% extends 'admin/base.html' %}
+{% load i18n %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block title %}
+    {% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('Django site admin') }}
+{% endblock %}
+
+{% block content %}
+    {% if kpi %}
+        <div class="dashboard-grid-kpi">
+            {% for card in kpi %}
+                <div class="dashboard-card">
+                    <div class="dashboard-text-label">
+                        {{ card.title }}
+                    </div>
+                    <div class="dashboard-text-metric">
+                        {{ card.metric }}
+                    </div>
+
+                    {# ⚡️ 新增逻辑：如果是 CPU 卡片，显示小进度条 #}
+                    {% if card.has_progress %}
+                        <div class="dashboard-progress-mini-bg">
+                            <div class="dashboard-progress-mini-bar" style="width: {{ card.progress_val }}%;"></div>
+                        </div>
+                    {% endif %}
+
+                    {% if card.footer %}
+                        <div class="dashboard-text-footer">
+                            {{ card.footer }}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="dashboard-grid-main">
+        {% if progress %}
+            <div class="dashboard-card">
+                <h3 class="dashboard-card-title">
+                    {% trans "系统监控" %}
+                </h3>
+                <div class="dashboard-stack">
+                    {% for chart in progress %}
+                        <div>
+                            <div class="dashboard-chart-header">
+                                <span class="dashboard-text-label" style="color: inherit;">{{ chart.title }}</span>
+                                <span class="dashboard-text-desc">{{ chart.description }}</span>
+                            </div>
+                            <div class="dashboard-progress-bg">
+                                <div class="dashboard-progress-fill {{ chart.color_class }}"
+                                     style="width: {{ chart.value }}%;">
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if navigation %}
+            <div class="dashboard-card">
+                <h3 class="dashboard-card-title">
+                    {% trans "快捷操作" %}
+                </h3>
+                <div class="dashboard-grid-nav">
+                    {% for nav in navigation %}
+                        <a href="{{ nav.link }}" class="dashboard-nav-link">
+                            <span class="material-symbols-outlined dashboard-nav-icon">
+                                {{ nav.icon }}
+                            </span>
+                            <div>
+                                <p class="dashboard-nav-title">{{ nav.title }}</p>
+                                <p class="dashboard-text-desc">{{ nav.text }}</p>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

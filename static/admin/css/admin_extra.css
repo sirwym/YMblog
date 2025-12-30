@@ -1,0 +1,19 @@
+/* 强制markdown 高度 */
+.EasyMDEContainer .CodeMirror {
+    height: 600px !important;
+    min-height: 600px !important;
+}
+/* 修复全屏模式 */
+/* 当切换到全屏时，高度必须设回 100vh，否则会被上面的 600px 锁死 */
+.EasyMDEContainer .CodeMirror.CodeMirror-fullscreen,
+.EasyMDEContainer .CodeMirror.CodeMirror-fullscreen .CodeMirror-scroll {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+}
+/*!* 2. 【关键】强制覆盖内部滚动区域的高度 *!*/
+/*!* 你的 HTML 里这个元素有内联的 min-height: 300px，必须用 !important 覆盖它 *!*/
+/*.EasyMDEContainer .CodeMirror .CodeMirror-scroll {*/
+/*    min-height: 650px !important;*/
+/*    height: 650px !important;*/
+/*}*/

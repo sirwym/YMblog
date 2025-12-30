@@ -1,0 +1,407 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}CSP-J/S 信奥学习路线图 - {{ config.SITE_NAME }}{% endblock %}
+
+{% block content %}
+<div>
+<ul class="timeline timeline-vertical">
+  <li>
+    <div class="timeline-start">1984</div>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end timeline-box">First Macintosh computer</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start">1998</div>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end timeline-box">iMac</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start">2001</div>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end timeline-box">iPod</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start">2007</div>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end timeline-box">iPhone</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start">2015</div>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end timeline-box">Apple Watch</div>
+  </li>
+</ul>
+</div>
+
+<div class="max-w-4xl mx-auto py-10">
+
+    <div class="text-center mb-16 space-y-4">
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight">
+            CSP-J/S 学习路线图
+        </h1>
+        <p class="text-base-content/70">
+            基于 NOI 2025 大纲修订版
+        </p>
+    </div>
+
+    <ul class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical"
+        x-data="{
+            activeStep: 1,
+            setStep(n) { this.activeStep = n; }
+        }">
+
+        <li>
+            <div class="timeline-middle">
+                <button @click="setStep(1)" class="btn btn-circle btn-sm border-none shadow-lg"
+                        :class="activeStep >= 1 ? 'btn-primary text-primary-content' : 'btn-ghost bg-base-200'">
+                    <span x-show="activeStep < 1">1</span>
+                    <svg x-show="activeStep >= 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <div class="timeline-start mb-10 md:text-end">
+                <time class="font-mono italic text-primary opacity-80">Level 1</time>
+                <div class="text-lg font-black text-primary">C++ 语言基础</div>
+                <div class="text-sm opacity-60 mb-2">CSP-J 入门级 - 基石</div>
+                <p class="text-sm text-base-content/70">
+                    变量、循环、数组、字符串、结构体、文件I/O。<br>
+                    这是通过 CSP-J 第一轮的必修课。
+                </p>
+            </div>
+
+            <hr :class="activeStep > 1 ? 'bg-primary' : ''" />
+        </li>
+
+        <li>
+            <hr :class="activeStep > 1 ? 'bg-primary' : ''" />
+
+            <div class="timeline-middle">
+                <button @click="setStep(2)" class="btn btn-circle btn-sm border-none shadow-lg"
+                        :class="activeStep >= 2 ? 'btn-primary text-primary-content' : 'btn-ghost bg-base-200'">
+                    <span class="font-bold text-xs" x-show="activeStep < 2">2</span>
+                    <svg x-show="activeStep >= 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <div class="timeline-end mb-10">
+                <time class="font-mono italic text-secondary opacity-80">Level 2</time>
+                <div class="text-lg font-black text-secondary">基础算法策略</div>
+                <div class="text-sm opacity-60 mb-2">CSP-J 核心算法</div>
+                <p class="text-sm text-base-content/70">
+                    模拟、枚举、排序、贪心、二分查找。<br>
+                    解决 J 组 T1/T2 题目的关键工具。
+                </p>
+            </div>
+
+            <hr :class="activeStep > 2 ? 'bg-primary' : ''" />
+        </li>
+
+        <li>
+            <hr :class="activeStep > 2 ? 'bg-primary' : ''" />
+
+            <div class="timeline-middle">
+                <button @click="setStep(3)" class="btn btn-circle btn-sm border-none shadow-lg"
+                        :class="activeStep >= 3 ? 'btn-primary text-primary-content' : 'btn-ghost bg-base-200'">
+                    <span class="font-bold text-xs" x-show="activeStep < 3">3</span>
+                    <svg x-show="activeStep >= 3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <div class="timeline-start mb-10 md:text-end">
+                <time class="font-mono italic text-accent opacity-80">Level 3</time>
+                <div class="text-lg font-black text-accent">搜索与数学</div>
+                <div class="text-sm opacity-60 mb-2">J组压轴 / S组基础</div>
+                <p class="text-sm text-base-content/70">
+                    DFS/BFS 搜索、质数筛法、GCD/LCM、简单动态规划。<br>
+                    冲击 CSP-J 一等奖的必经之路。
+                </p>
+            </div>
+
+            <hr :class="activeStep > 3 ? 'bg-primary' : ''" />
+        </li>
+
+        <li>
+            <hr :class="activeStep > 3 ? 'bg-primary' : ''" />
+
+            <div class="timeline-middle">
+                <button @click="setStep(4)" class="btn btn-circle btn-sm border-none shadow-lg"
+                        :class="activeStep >= 4 ? 'btn-primary text-primary-content' : 'btn-ghost bg-base-200'">
+                    <span class="font-bold text-xs" x-show="activeStep < 4">4</span>
+                    <svg x-show="activeStep >= 4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <div class="timeline-end mb-10">
+                <time class="font-mono italic text-secondary opacity-80">Level 4</time>
+                <div class="text-lg font-black text-secondary">图论与数据结构</div>
+                <div class="text-sm opacity-60 mb-2">CSP-S 提高级核心</div>
+                <p class="text-sm text-base-content/70">
+                    最短路、最小生成树、并查集、树状数组。<br>
+                    正式进入高中/提高级组别的竞争领域。
+                </p>
+            </div>
+
+            <hr :class="activeStep > 4 ? 'bg-primary' : ''" />
+        </li>
+
+        <li>
+            <hr :class="activeStep > 4 ? 'bg-primary' : ''" />
+
+            <div class="timeline-middle">
+                <button @click="setStep(5)" class="btn btn-circle btn-sm border-none shadow-lg"
+                        :class="activeStep >= 5 ? 'btn-primary text-primary-content' : 'btn-ghost bg-base-200'">
+                    <span class="font-bold text-xs" x-show="activeStep < 5">5</span>
+                    <svg x-show="activeStep >= 5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                </button>
+            </div>
+
+            <div class="timeline-start mb-10 md:text-end">
+                <time class="font-mono italic text-warning opacity-80">Level 5</time>
+                <div class="text-lg font-black text-warning">高级动态规划</div>
+                <div class="text-sm opacity-60 mb-2">S组高分与NOIP</div>
+                <p class="text-sm text-base-content/70">
+                    区间DP、树形DP、状压DP、单调队列优化。<br>
+                    这是拉开分差、冲击省一等奖的关键难点。
+                </p>
+            </div>
+        </li>
+
+    </ul>
+
+    <div>
+        <ul class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
+  <li>
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-start mb-10 md:text-end">
+      <time class="font-mono italic">1984</time>
+      <div class="text-lg font-black">First Macintosh computer</div>
+      The Apple Macintosh—later rebranded as the Macintosh 128K—is the original Apple Macintosh
+      personal computer. It played a pivotal role in establishing desktop publishing as a general
+      office function. The motherboard, a 9 in (23 cm) CRT monitor, and a floppy drive were housed
+      in a beige case with integrated carrying handle; it came with a keyboard and single-button
+      mouse.
+    </div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end md:mb-10">
+      <time class="font-mono italic">1998</time>
+      <div class="text-lg font-black">iMac</div>
+      iMac is a family of all-in-one Mac desktop computers designed and built by Apple Inc. It has
+      been the primary part of Apple's consumer desktop offerings since its debut in August 1998,
+      and has evolved through seven distinct forms
+    </div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-start mb-10 md:text-end">
+      <time class="font-mono italic">2001</time>
+      <div class="text-lg font-black">iPod</div>
+      The iPod is a discontinued series of portable media players and multi-purpose mobile devices
+      designed and marketed by Apple Inc. The first version was released on October 23, 2001, about
+      8+1⁄2 months after the Macintosh version of iTunes was released. Apple sold an estimated 450
+      million iPod products as of 2022. Apple discontinued the iPod product line on May 10, 2022. At
+      over 20 years, the iPod brand is the oldest to be discontinued by Apple
+    </div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-end md:mb-10">
+      <time class="font-mono italic">2007</time>
+      <div class="text-lg font-black">iPhone</div>
+      iPhone is a line of smartphones produced by Apple Inc. that use Apple's own iOS mobile
+      operating system. The first-generation iPhone was announced by then-Apple CEO Steve Jobs on
+      January 9, 2007. Since then, Apple has annually released new iPhone models and iOS updates. As
+      of November 1, 2018, more than 2.2 billion iPhones had been sold. As of 2022, the iPhone
+      accounts for 15.6% of global smartphone market share
+    </div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-middle">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 20 20"
+        fill="currentColor"
+        class="h-5 w-5"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
+          clip-rule="evenodd"
+        />
+      </svg>
+    </div>
+    <div class="timeline-start mb-10 md:text-end">
+      <time class="font-mono italic">2015</time>
+      <div class="text-lg font-black">Apple Watch</div>
+      The Apple Watch is a line of smartwatches produced by Apple Inc. It incorporates fitness
+      tracking, health-oriented capabilities, and wireless telecommunication, and integrates with
+      iOS and other Apple products and services
+    </div>
+  </li>
+</ul>
+    </div>
+
+    <div>
+        <ul class="timeline timeline-vertical">
+  <li>
+    <div class="timeline-start timeline-box">First Macintosh computer</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-end timeline-box">iMac</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start timeline-box">iPod</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-end timeline-box">iPhone</div>
+    <hr />
+  </li>
+  <li>
+    <hr />
+    <div class="timeline-start timeline-box">Apple Watch</div>
+  </li>
+</ul>
+    </div>
+</div>
+{% endblock %}

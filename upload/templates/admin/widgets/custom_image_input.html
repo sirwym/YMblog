@@ -1,0 +1,71 @@
+{% load i18n %}
+
+{# JS 函数定义 #}
+<script>
+if (typeof unfoldUpdateImagePreview === 'undefined') {
+    window.unfoldUpdateImagePreview = function(input, previewId, filenameId, placeholderId) {
+        const preview = document.getElementById(previewId);
+        const filenameInput = document.getElementById(filenameId);
+        const placeholder = document.getElementById(placeholderId);
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            const reader = new FileReader();
+
+            if (filenameInput) filenameInput.value = file.name;
+
+            reader.onload = function(e) {
+                if (preview) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                }
+                if (placeholder) placeholder.style.display = 'none';
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+}
+</script>
+
+<div class="mb-4 relative group">
+    <img id="preview_{{ widget.attrs.id }}"
+         src="{% if widget.value %}{{ widget.value.url }}{% endif %}"
+         alt="{% trans 'Image preview' %}"
+         class="block rounded-default border border-base-200 dark:border-base-700 shadow-sm bg-base-50 dark:bg-base-900 object-contain transition-all duration-300"
+         style="max-height: 150px; max-width: 100%; width: auto; {% if not widget.value %}display: none;{% endif %}" />
+
+    <p id="placeholder_{{ widget.attrs.id }}" class="text-sm text-base-400 mt-2" style="{% if widget.value %}display: none;{% endif %}">
+        {% trans '-' %}
+    </p>
+</div>
+
+<div class="{{ widget.file_wrapper_class }}">
+
+    <label for="{{ widget.attrs.id }}" class="grow relative cursor-pointer flex items-center">
+        <input id="filename_{{ widget.attrs.id }}"
+               type="text"
+               aria-label="{% trans 'Choose file to upload' %}"
+               value="{% if widget.value %}{{ widget.value }}{% else %}{{ widget.attrs.placeholder|default:'点击上传文件' }}{% endif %}"
+               disabled
+               class="grow font-medium min-w-0 px-3 py-2 text-ellipsis bg-transparent cursor-pointer w-full border-none focus:ring-0 text-sm">
+        <span class="absolute left-0 bottom-0 top-0 right-0"></span>
+    </label>
+
+    <div class="bg-white flex flex-none items-center leading-none self-stretch dark:bg-base-900 border-l border-base-200 dark:border-base-700">
+        <div class="opacity-0 overflow-hidden w-[0px] h-[0px]">
+            <input type="{{ widget.type }}" name="{{ widget.name }}"
+                   onchange="unfoldUpdateImagePreview(this, 'preview_{{ widget.attrs.id }}', 'filename_{{ widget.attrs.id }}', 'placeholder_{{ widget.attrs.id }}')"
+                   {% include "django/forms/widgets/attrs.html" %} />
+        </div>
+
+        {% if widget.is_initial %}
+            <a href="{{ widget.value.url }}" class="flex items-center justify-center h-full border-r border-base-200 cursor-pointer text-base-400 px-3 hover:text-primary-600 dark:border-base-700 dark:text-base-500 dark:hover:text-primary-500 transition-colors" target="_blank" title="{% trans 'Download' %}">
+                <span class="material-symbols-outlined text-[20px]">download</span>
+            </a>
+        {% endif %}
+
+        <label for="{{ widget.attrs.id }}" class="flex items-center justify-center h-full cursor-pointer text-base-400 px-3 hover:text-primary-600 dark:text-base-500 dark:hover:text-primary-500 transition-colors" title="{% trans 'Change' %}">
+            <span class="material-symbols-outlined text-[20px]">upload</span>
+        </label>
+    </div>
+</div>

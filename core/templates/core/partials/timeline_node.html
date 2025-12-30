@@ -1,0 +1,74 @@
+<div class="relative group" x-data="{ open: false }">
+
+    <div class="absolute -left-[33px] top-6 w-4 h-4 rounded-full border-2 bg-base-100 z-10 transition-colors duration-300
+        {% if is_hard %}
+            !bg-error !border-error animate-pulse shadow-[0_0_10px_rgba(255,0,0,0.5)]
+        {% elif type == 'primary' %}
+            border-primary group-hover:bg-primary
+        {% else %}
+            border-secondary group-hover:bg-secondary
+        {% endif %}">
+    </div>
+
+    <div class="card bg-base-100 border transition-all duration-300 cursor-pointer overflow-hidden
+        {% if type == 'primary' %}
+            border-primary/20 hover:border-primary hover:shadow-[0_0_20px_rgba(var(--p),0.15)]
+        {% else %}
+            border-secondary/20 hover:border-secondary hover:shadow-[0_0_20px_rgba(var(--s),0.15)]
+        {% endif %}"
+        @click="open = !open">
+
+        <div class="card-body p-5 pb-5">
+            <div class="flex justify-between items-start gap-4">
+                <div>
+                    <div class="flex items-center gap-2 mb-1 text-xs font-mono opacity-50 uppercase tracking-widest">
+                        {{ level }}
+                        {% if is_hard %}
+                        <span class="badge badge-error badge-xs text-error-content gap-1">核心难点</span>
+                        {% endif %}
+                    </div>
+                    <h3 class="card-title text-lg font-bold transition-colors
+                        {% if type == 'primary' %} group-hover:text-primary {% else %} group-hover:text-secondary {% endif %}">
+                        {{ title }}
+                    </h3>
+                    <div class="text-xs text-warning mt-1 tracking-widest opacity-80" title="难度系数">{{ diff }}</div>
+                </div>
+
+                <button class="btn btn-circle btn-xs btn-ghost transition-transform duration-300"
+                        :class="open ? 'rotate-180 bg-base-200' : ''">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+            </div>
+
+            <div class="flex flex-wrap gap-2 mt-4">
+                {% for tag in tags.split %}
+                    <span class="badge badge-sm border-0 font-medium
+                        {% if type == 'primary' %} bg-primary/10 text-primary
+                        {% else %} bg-secondary/10 text-secondary {% endif %}">
+                        {{ tag }}
+                    </span>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div x-show="open"
+             x-collapse
+             x-cloak
+             class="border-t border-base-content/5 bg-base-200/50">
+            <div class="p-5 pt-3">
+                <p class="text-sm text-base-content/70 leading-relaxed">
+                    <span class="font-bold text-base-content/90 block mb-1">学习目标：</span>
+                    {{ desc }}
+                </p>
+                <div class="mt-4 flex justify-end">
+                    <a href="{% url 'blog:post_list' %}?tag={{ title }}"
+                       class="btn btn-xs btn-outline
+                       {% if type == 'primary' %} btn-primary {% else %} btn-secondary {% endif %}">
+                       查看相关文章
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

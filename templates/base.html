@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="zh-hans" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>{% block title %}首页{% endblock %} - {{ config.SITE_NAME }}</title>
+
+    <meta name="description" content="{% block meta_description %}{{ config.SITE_DESCRIPTION }}{% endblock %}">
+    <meta name="keywords" content="{% block meta_keywords %}{{ config.SITE_KEYWORDS }}{% endblock %}">
+    <meta name="author" content="{{ config.SITE_NAME }}"> <meta property="og:title" content="{% block og_title %}{{ config.SITE_NAME }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}{{ config.SITE_DESCRIPTION }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.build_absolute_uri }}">
+    <meta property="og:site_name" content="{{ config.SITE_NAME }}">
+    <meta property="og:image" content="{% block og_image %}{% static 'img/default-og.png' %}{% endblock %}">
+
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ config.SITE_NAME }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}{{ config.SITE_DESCRIPTION }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% static 'img/default-og.png' %}{% endblock %}">
+
+    <link rel="icon" type="image/png" href="{% static 'img/favicon/favicon.svg' %}">
+
+    <link href="{% static 'css/dist.css' %}" rel="stylesheet" type="text/css" />
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script defer src="{% static 'js/alpine.min.js' %}"></script>
+
+    <script>
+        if (localStorage.getItem('theme')) {
+            document.documentElement.setAttribute('data-theme', localStorage.getItem('theme'))
+        }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="min-h-screen flex flex-col bg-base-100 text-base-content font-sans antialiased"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
+    {% include "partials/navbar.html" %}
+
+    {% include "partials/messages.html" %}
+
+    <main class="flex-grow container mx-auto px-4 py-6">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include "partials/footer.html" %}
+
+    <script src="{% static 'js/theme.js' %}"></script>
+
+    <script>
+        // HTMX 错误监听
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            // 生产环境可以改成 Toast 提示，不要用 alert
+            console.error("HTMX Error:", evt.detail);
+        });
+    </script>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>
