@@ -23,8 +23,6 @@ def post_list(request):
     paginator = Paginator(posts, 9)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
-    print(page_obj.__dict__)
-    print(page_obj.paginator.count)
     context = {
         'posts': page_obj,
         'categories': Category.objects.annotate(post_count=Count('post')),  #  侧边栏分类列表
