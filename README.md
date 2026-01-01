@@ -1,12 +1,17 @@
-# 🚀 YM Blog
+<div align="center">
+  <img src="static/img/ym-logo.png" alt="YM Blog Logo" width="120">
+  <h1>YM Blog</h1>
+</div>
 
-> 一个专注于 C++、算法分享与创意游戏展示的现代化 Web 平台。
+<div align="center">
 
 ![Django](https://img.shields.io/badge/Django-5.2-092E20?style=flat-square&logo=django)
 ![HTMX](https://img.shields.io/badge/HTMX-2.0.7-3D72D7?style=flat-square&logo=htmx)
 ![Alpine.js](https://img.shields.io/badge/Alpine.js-3.13-8BC0D0?style=flat-square&logo=alpinedotjs)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1-38B2AC?style=flat-square&logo=tailwindcss)
 ![DaisyUI](https://img.shields.io/badge/DaisyUI-5.5-5A0EF8?style=flat-square)
+
+</div>
 
 ## 📖 项目概览
 
@@ -46,7 +51,7 @@
 * **沉浸式阅读**: 支持标准 Markdown、KaTeX 公式渲染、多语言代码高亮。
 * **智能目录**: 自动生成 TOC 目录，支持 Sticky 吸顶，长文阅读无压力。
 * **高并发计数**: 使用 Django `F()` 表达式实现原子阅读计数，结合 Session 防止防刷新。
-* **内容保护**: 支持单篇文章设置访问密码。
+* **内容保护**: 支持单篇文章设置访问密码，解锁状态通过 Session 管理。
 * **无限滚动**: 列表页基于 HTMX 实现 `Load More` (outerHTML 替换)，体验丝滑。
 
 ### 3. 🎮 游戏工坊 (Game)
@@ -102,6 +107,7 @@
     DB_NAME=ymblog
     DB_USER=root
     DB_PASSWORD=password
+    DB_HOST=127.0.0.1
     ```
 
 5.  **迁移与运行**
@@ -125,7 +131,7 @@
 ---
 
 ## 📅 后续开发计划 (Roadmap)
-
+- [ ] **工具箱**: 新增工具箱模块，集成自研实用工 例如在线C++、教学辅助小工具（如复杂度分析、样例生成）
 - [ ] **SEO 增强**: 自动生成 sitemap.xml 和 robots.txt。
 - [ ] **搜索功能**: 集成 Haystack + Whoosh 实现全站全文搜索。
 - [ ] **PWA 支持**: 添加 Service Worker，支持离线访问与“添加到主屏幕”。
