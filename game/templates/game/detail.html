@@ -59,7 +59,6 @@
 
         <div class="game-content-area relative w-full bg-black flex items-center justify-center group"
              :class="isWebFullscreen ? 'h-[calc(100vh-64px)]' : 'aspect-[4/3] md:aspect-video'">
-
             <iframe
                 src="{{ game.game_file.url }}"
                 class="w-full h-full border-0"
@@ -68,12 +67,6 @@
                 allow="autoplay; gamepad; microphone; camera"
                 scrolling="no">
             </iframe>
-
-            <div class="absolute inset-0 pointer-events-none flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                <span class="badge badge-lg bg-black/50 text-white border-0 backdrop-blur-sm">
-                    点击画面开始操作
-                </span>
-            </div>
         </div>
     </div>
 

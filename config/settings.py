@@ -121,9 +121,9 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': env("DB_NAME", default="YMblog"),       # 数据库名
-        'USER': env("DB_USER", default="ymblog"),         # 数据库用户名
-        'PASSWORD': env("DB_PASSWORD", default="ymblog123456"),     # 数据库密码
+        'NAME': env("DB_NAME", default="YMmysql"),       # 数据库名
+        'USER': env("DB_USER", default="YMmysql"),         # 数据库用户名
+        'PASSWORD': env("DB_PASSWORD", default="YMmysql123456"), # 数据库密码
         'HOST': env("DB_HOST", default="127.0.0.1"),    # 数据库主机
         'PORT': env("DB_PORT", default="3306"),         # 数据库端口
         'OPTIONS': {

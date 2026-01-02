@@ -16,7 +16,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {% for game in hot_games %}
                     <div class="card lg:card-side bg-base-100 shadow-xl border border-base-200 overflow-hidden group hover:shadow-2xl hover:border-secondary/30 transition-all duration-300">
-                        <figure class="lg:w-2/5 relative overflow-hidden">
+                        <figure class="lg:w-2/5 shrink-0 h-full relative overflow-hidden">
                             {% if game.cover %}
                                 <img src="{{ game.cover.url }}" loading="lazy" alt="{{ game.title }}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
                             {% else %}

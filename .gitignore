@@ -3,4 +3,5 @@ __pycache__/
 node_modules/
 media/
 logs/
+.env
 db.sqlite3
