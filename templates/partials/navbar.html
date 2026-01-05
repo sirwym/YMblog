@@ -1,49 +1,52 @@
 <div class="navbar bg-base-100 shadow-sm sticky top-0 z-50">
-  <div class="navbar-start">
-    <div class="dropdown">
-      <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
-        </svg>
-      </div>
-      <ul
-        tabindex="0"
-        class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
-        <li><a href="{% url 'core:index' %}">首页</a></li>
-        <li><a href="{% url 'blog:post_list' %}">技术博客</a></li>
-        <li><a href="{% url 'game:game_list' %}">游戏工坊</a></li>
-      </ul>
-    </div>
-    <a href="{% url 'core:index' %}" class="btn btn-ghost text-xl font-bold text-primary tracking-wide">
-      YM<span class="text-base-content">Blog</span>
-    </a>
-  </div>
+    <div class="navbar-start">
+        <div class="dropdown">
+            <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                </svg>
+            </div>
+            <ul
+                    tabindex="0"
+                    class="menu menu-sm dropdown-content bg-base-100 rounded-box z-50 mt-3 w-52 p-2 shadow">
+                <li><a href="{% url 'core:index' %}">首页</a></li>
+                <li><a href="{% url 'blog:post_list' %}">技术博客</a></li>
+                <li><a href="{% url 'game:game_list' %}">游戏工坊</a></li>
+                <li><a href="{% url 'tools:dashboard' %}">百宝箱</a></li>
 
-  <div class="navbar-center hidden lg:flex">
-    <ul class="menu menu-horizontal px-1 font-medium text-base">
-        <li><a href="{% url 'core:index' %}" class="hover:text-primary">首页</a></li>
-        <li><a href="{% url 'blog:post_list' %}" class="hover:text-primary">技术博客</a></li>
-        <li><a href="{% url 'game:game_list' %}" class="hover:text-primary">游戏工坊</a></li>
-    </ul>
-  </div>
-
-  <div class="navbar-end gap-2">
-      <div class="navbar-end gap-2">
-
-    <div title="Change Theme" class="dropdown dropdown-end hidden sm:inline-block">
-      <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Change Theme">
-        <div class="grid h-5 w-5 grid-cols-2 gap-0.5 overflow-hidden rounded-full bg-base-100 p-0.5 shadow-sm ring-1 ring-base-content/10">
-          <div class="bg-base-content rounded-full"></div>
-          <div class="bg-primary rounded-full"></div>
-          <div class="bg-secondary rounded-full"></div>
-          <div class="bg-accent rounded-full"></div>
+            </ul>
         </div>
-      </div>
+        <a href="{% url 'core:index' %}" class="btn btn-ghost text-xl font-bold text-primary tracking-wide">
+            YM<span class="text-base-content">Blog</span>
+        </a>
+    </div>
 
-      <div tabindex="0" class="dropdown-content mt-3 w-52 overflow-y-auto max-h-[60vh] bg-base-200 p-2 shadow-2xl rounded-box z-50 border border-base-content/5">
-        <ul class="menu menu-sm gap-1">
-          <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="light">
+    <div class="navbar-center hidden lg:flex">
+        <ul class="menu menu-horizontal px-1 font-medium text-base">
+            <li><a href="{% url 'core:index' %}" class="hover:text-primary">首页</a></li>
+            <li><a href="{% url 'blog:post_list' %}" class="hover:text-primary">技术博客</a></li>
+            <li><a href="{% url 'game:game_list' %}" class="hover:text-primary">游戏工坊</a></li>
+            <li><a href="{% url 'tools:dashboard' %}" class="hover:text-primary">百宝箱</a></li>
+        </ul>
+    </div>
+
+    <div class="navbar-end gap-2">
+        <div class="navbar-end gap-2">
+
+            <div title="Change Theme" class="dropdown dropdown-end hidden sm:inline-block">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="Change Theme">
+                    <div class="grid h-5 w-5 grid-cols-2 gap-0.5 overflow-hidden rounded-full bg-base-100 p-0.5 shadow-sm ring-1 ring-base-content/10">
+                        <div class="bg-base-content rounded-full"></div>
+                        <div class="bg-primary rounded-full"></div>
+                        <div class="bg-secondary rounded-full"></div>
+                        <div class="bg-accent rounded-full"></div>
+                    </div>
+                </div>
+
+                <div tabindex="0" class="dropdown-content mt-3 w-52 overflow-y-auto max-h-[60vh] bg-base-200 p-2 shadow-2xl rounded-box z-50 border border-base-content/5">
+                    <ul class="menu menu-sm gap-1">
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="light">
               <span class="flex items-center gap-2">
                 <span data-theme="light" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -53,10 +56,10 @@
                 </span>
                 <span class="font-medium">Light</span>
               </span>
-            </button>
-          </li>
-          <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="dark">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="dark">
               <span class="flex items-center gap-2">
                 <span data-theme="dark" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -66,10 +69,10 @@
                 </span>
                 <span class="font-medium">Dark</span>
               </span>
-            </button>
-          </li>
-          <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="cyberpunk">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="cyberpunk">
               <span class="flex items-center gap-2">
                 <span data-theme="cyberpunk" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -79,10 +82,10 @@
                 </span>
                 <span class="font-medium">cyberpunk</span>
               </span>
-            </button>
-          </li>
-          <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="lofi">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="lofi">
               <span class="flex items-center gap-2">
                 <span data-theme="lofi" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -92,10 +95,10 @@
                 </span>
                 <span class="font-medium">lofi</span>
               </span>
-            </button>
-          </li>
-           <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="dim">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="dim">
               <span class="flex items-center gap-2">
                 <span data-theme="dim" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -105,10 +108,10 @@
                 </span>
                 <span class="font-medium">dim</span>
               </span>
-            </button>
-          </li>
-            <li>
-            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="lemonade">
+                            </button>
+                        </li>
+                        <li>
+                            <button class="grid grid-cols-[1fr_auto] gap-3 px-2" data-set-theme="lemonade">
               <span class="flex items-center gap-2">
                 <span data-theme="lemonade" class="grid h-4 w-4 shrink-0 grid-cols-2 gap-0.5 rounded-full overflow-hidden bg-base-100 shadow-sm ring-1 ring-base-content/10">
                   <span class="bg-base-content"></span>
@@ -118,23 +121,23 @@
                 </span>
                 <span class="font-medium">lemonade</span>
               </span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <button class="btn btn-ghost btn-circle" aria-label="搜索">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
             </button>
-          </li>
-        </ul>
-      </div>
+
+            {#    <a href="https://github.com/sirwym" target="_blank" class="btn btn-ghost btn-circle" aria-label="Github">#}
+            {#      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">#}
+            {#        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>#}
+            {#      </svg>#}
+            {#    </a>#}
+        </div>
     </div>
-
-    <button class="btn btn-ghost btn-circle" aria-label="搜索">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-      </svg>
-    </button>
-
-{#    <a href="https://github.com/sirwym" target="_blank" class="btn btn-ghost btn-circle" aria-label="Github">#}
-{#      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">#}
-{#        <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>#}
-{#      </svg>#}
-{#    </a>#}
-  </div>
-  </div>
 </div>

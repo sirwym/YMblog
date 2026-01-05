@@ -46,7 +46,6 @@ def post_detail(request, slug):
         # 在 Session 中标记已读，防止刷新页面重复计数
         request.session[view_session_key] = True
 
-
     unlock_session_key = f'post_unlocked_{post.id}'
     # 如果文章有密码(is_encrypted) 且 Session里没有记录True，则视为锁定
     is_locked = post.is_encrypted and not request.session.get(unlock_session_key, False)
@@ -55,7 +54,7 @@ def post_detail(request, slug):
         input_password = request.POST.get('password')
         if input_password == post.password:
             request.session[unlock_session_key] = True
-            request.session.set_expiry(60 * 60 * 24)
+            request.session.set_expiry(0)
             return redirect('blog:post_detail', slug=slug)
         else:
             error_message = "访问密码错误，请重新输入"

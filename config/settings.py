@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'upload.apps.UploadConfig',
     'core.apps.CoreConfig', # 放通用的逻辑
+    "tools.apps.ToolsConfig",
 ]
 
 ######################################################################
@@ -396,6 +397,25 @@ UNFOLD = {
                 ],
             },
             {
+                "title": _("工具箱"),
+                "separator": True,
+                "collapsible": True,  # 可折叠，平时不看
+                "items": [
+                    {
+                        "title": _("所有工具"),
+                        "icon": "home_repair_service",
+                        "link": reverse_lazy("admin:tools_tool_changelist"),
+                        "permission": lambda request: request.user.has_perm("tools.view_tool"),
+                    },
+                    {
+                        "title": _("添加工具"),
+                        "icon": "add_circle",
+                        "link": reverse_lazy("admin:tools_tool_add"),
+                        "permission": lambda request: request.user.has_perm("tools.add_tool"),
+                    },
+                ],
+            },
+            {
                 "title": _("资源管理"),
                 "separator": True,
                 "collapsible": True,  # 可折叠，平时不看
@@ -460,12 +480,90 @@ UNFOLD = {
 ######################################################################
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
-# settings.py 底部添加
+######################################################################
+# 评测机 设置
+######################################################################
+GO_JUDGE_BASE_URL = env('GO_JUDGE_BASE_URL', default="http://localhost:5050")
+MEMORY_LIMIT_MB = env.int('MEMORY_LIMIT_MB', default=256)
+MEMORY_LIMIT_BYTES = MEMORY_LIMIT_MB * 1024 * 1024
 
+
+######################################################################
+# 日志 设置
+######################################################################
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} [{process}] {name}: {message}',
+            'style': '{',
+        },
+    },
+
+    'handlers': {
+        # 1. 业务日志文件 (记录 INFO 及以上)
+        # 使用 RotatingFileHandler 限制大小
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs/django.log',
+            'maxBytes': 20 * 1024 * 1024,  # 单个文件最大 20MB (调小一点)
+            'backupCount': 5,  # 保留 5 个备份 (共 100MB)
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+
+        # 2. 错误日志文件 (只记录 ERROR 及以上，包含堆栈)
+        'error_file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': BASE_DIR / 'logs/error.log',
+            'maxBytes': 20 * 1024 * 1024,
+            'backupCount': 5,
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+
+    # 根日志：兜底用的，防止有漏网之鱼
+    'root': {
+        'handlers': ['error_file', 'console'],  # 根日志只记录到错误文件和控制台
+        'level': 'WARNING',  # ✅ 调高：平时不记录废话，除非有警告或错误
+    },
+
+    'loggers': {
+        # 1. Django 框架日志
+        'django': {
+            'handlers': ['file', 'error_file', 'console'],
+            'level': 'WARNING',  # ✅ 关键：设为 WARNING。忽略掉普通的 HTTP 200 请求记录，除非出错了。
+            'propagate': False,
+        },
+        'tools': {
+            'handlers': ['file', 'error_file'],
+            'level': 'INFO',  # ✅ 保持 INFO：你需要知道代码有没有开始编译、有没有收到请求。
+            'propagate': False,
+        },
+        'game': {'handlers': ['file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'blog': {'handlers': ['file', 'error_file'], 'level': 'INFO', 'propagate': False},
+        'httpx': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
+
+######################################################################
+# 安全设置
+######################################################################
 if not DEBUG:
-    # ==============================================================================
-    # 🔒 安全设置 (Security)
-    # ==============================================================================
 
     # 1. 强制 HTTPS 重定向
     # 确保你的服务器(Nginx)配置了SSL证书，否则开启后会导致无限循环重定向
@@ -489,36 +587,3 @@ if not DEBUG:
     # 5. 信任的代理设置 (配合 Nginx 使用)
     # 告诉 Django 它是运行在 Nginx 代理后面的，信任 Nginx 传来的 HTTPS 头
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-    # ==============================================================================
-    # 📝 生产环境日志 (Logging)
-    # ==============================================================================
-    # 记录错误日志到文件，而不是直接报错给用户看
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'formatters': {
-            'verbose': {
-                'format': '{levelname} {asctime} {module} {message}',
-                'style': '{',
-            },
-        },
-        'handlers': {
-            'file': {
-                'level': 'ERROR',
-                'class': 'logging.FileHandler',
-                'filename': BASE_DIR / 'logs/django_error.log',  # 记得在服务器创建 logs 目录
-                'formatter': 'verbose',
-            },
-            'console': {
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'loggers': {
-            'django': {
-                'handlers': ['file', 'console'],
-                'level': 'ERROR',
-                'propagate': True,
-            },
-        },
-    }

@@ -3,17 +3,26 @@ from django.db.models import F
 from .models import GameCategory
 from django.core.paginator import Paginator
 from .models import Game
+import logging
+
+logger = logging.getLogger(__name__)
 
 def game_list(request):
-    base_qs = Game.objects.filter(is_public=True).select_related('category').prefetch_related('tags')
+    latest_games = Game.objects.filter(is_public=True).select_related('category').prefetch_related('tags')
 
-    hot_games = base_qs.order_by('-likes_count')[:2]  # 选择点赞最高的两个
-    hot_game_ids = [game.id for game in hot_games]
-
-    latest_games = base_qs.exclude(id__in=hot_game_ids).order_by('-created_at')
     category_slug = request.GET.get('category')
     if category_slug:
         latest_games = latest_games.filter(category__slug=category_slug)
+
+    sort_param = request.GET.get('sort', 'newest')
+    sort_options = {
+        'newest': '-created_at',  # 最新发布 (时间降序)
+        'oldest': 'created_at',  # 最早发布 (时间升序)
+        'hot': '-likes_count',  # 点赞最多
+        'cold': 'likes_count',  # 点赞最少
+    }
+    order_by_field = sort_options.get(sort_param, '-created_at')
+    latest_games = latest_games.order_by(order_by_field)
 
     paginator = Paginator(latest_games, 12)
     page_number = request.GET.get('page')
@@ -23,10 +32,10 @@ def game_list(request):
 
     context = {
         'categories': GameCategory.objects.all(),
-        'hot_games': hot_games,
         'latest_games': page_obj,
         'custom_page_range': custom_page_range,  # 传给模板用于生成按钮
         'current_category': category_slug,  # 传回当前分类，用于翻页时保持筛选状态
+        'current_sort': sort_param
     }
     return render(request, 'game/list.html', context)
 

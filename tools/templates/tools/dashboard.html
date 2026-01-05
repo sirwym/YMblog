@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}开发者工具箱{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto px-4 py-8">
+
+        <h1 class="text-3xl font-extrabold flex items-center gap-3 mb-8">
+            <span class="w-1.5 h-8 bg-primary rounded-full"></span>
+            在线工具箱
+        </h1>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for tool in tools %}
+                <a href="{{ tool.get_absolute_url }}" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 border border-base-200 group">
+                    <div class="card-body flex flex-row items-center gap-4">
+                        {% if tool.icon %}
+                            <img src="{{ tool.icon.url }}" class="w-12 h-12 object-contain" alt="{{ tool.title }}">
+                        {% else %}
+                            <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center text-2xl">
+                                🔧
+                            </div>
+                        {% endif %}
+
+                        <div>
+                            <h2 class="card-title group-hover:text-primary transition-colors">
+                                {{ tool.title }}
+                                {% if tool.password %}
+                                    <div class="tooltip" data-tip="需要密码访问">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-warning" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                        </svg>
+                                    </div>
+                                {% endif %}
+                            </h2>
+
+                            <p class="text-sm opacity-60 line-clamp-1">{{ tool.description }}</p>
+                        </div>
+                    </div>
+                </a>
+            {% empty %}
+                <div class="col-span-full text-center py-12 opacity-50">
+                    暂无可用工具，敬请期待...
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

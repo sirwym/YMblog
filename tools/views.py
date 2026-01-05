@@ -1,0 +1,216 @@
+from django.shortcuts import render,get_object_or_404
+import json
+import httpx
+import re # 引入正则处理版本号
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import Tool
+import logging
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
+
+
+def check_tool_permission(request, tool_url_name):
+    """
+    检查工具是否需要密码，以及用户是否已解锁
+    返回: (Tool对象, 是否允许访问)
+    """
+    # 根据 url_name 找到对应的工具 (注意：cpp_runner 对应的数据库 url_name 必须是 'cpp_runner')
+    # 如果找不到工具，我们默认它不需要密码（或者你可以抛出404）
+    tool = Tool.objects.filter(url_name=tool_url_name).first()
+
+    if not tool:
+        return None, True  # 工具没入库，默认允许访问
+
+    if not tool.password:
+        return tool, True  # 没有设置密码，直接允许
+
+    # 检查 Session
+    unlocked_list = request.session.get('unlocked_tools', [])
+    if tool.id in unlocked_list:
+        return tool, True  # 已经解锁过
+
+    return tool, False  # 需要密码且未解锁
+
+
+def tool_dashboard(request):
+    """工具箱显示页"""
+    tools = Tool.objects.filter(is_active=True)
+
+    return render(request, "tools/dashboard.html", {"tools": tools})
+
+def cpp_runner(request):
+    """C++工具运行页面"""
+
+    # 1. 检查权限
+    tool, allowed = check_tool_permission(request, 'cpp_runner')
+
+    # 2. 如果被锁住，渲染锁屏页面
+    if tool and not allowed:
+        return render(request, "tools/lock_screen.html", {"tool": tool})
+
+    return render(request, "tools/cpp_runner.html")
+
+async def get_sys_info(request):
+    """获取编译器版本信息"""
+    try:
+        async with httpx.AsyncClient() as client:
+            payload = {
+                "cmd": [{
+                    "args": ["/usr/bin/g++", "--version"],
+                    "env": ["PATH=/usr/bin:/bin"],
+                    "files": [{"content": ""}, {"name": "stdout", "max": 1024}, {"name": "stderr", "max": 1024}],
+                    "cpuLimit": 1000000000,
+                    "memoryLimit": 64 * 1024 * 1024,
+                    "procLimit": 50
+                }]
+            }
+            res = await client.post(f"{settings.GO_JUDGE_BASE_URL}/run", json=payload)
+            data = res.json()[0]
+
+            # 解析第一行，例如 "g++ (Alpine 12.2.1_git20220924-r10) 12.2.1 ..."
+            raw_version = data['files']['stdout'].split('\n')[0]
+            # 提取版本号数字 (可选)
+            # version_match = re.search(r'g\+\+.*?(\d+\.\d+\.\d+)', raw_version)
+
+            return JsonResponse({
+                'compiler': raw_version,
+                'memory_limit': settings.MEMORY_LIMIT_MB
+            })
+    except Exception as e:
+        logger.exception(f"获取系统信息失败: {e}")
+        return JsonResponse({'compiler': 'G++ (未知版本)', 'memory_limit': settings.MEMORY_LIMIT_MB})
+
+
+async def run_cpp_api(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body)
+        code = data.get('code', '')
+        user_input = data.get('input', '')
+        use_o2 = data.get('use_o2', True)
+
+        if not code:
+            return JsonResponse({'error': '代码不能为空'}, status=400)
+
+        async with httpx.AsyncClient() as client:
+
+            # ==========================================
+            # 第一步：编译请求
+            # ==========================================
+            # 基础参数
+            compiler_args = ["/usr/bin/g++", "main.cpp", "-std=c++14", "-o", "main"]
+
+            # 如果开启了优化，追加 -O2
+            if use_o2:
+                compiler_args.append("-O2")
+            compile_payload = {
+                "cmd": [{
+                    "args": compiler_args,
+
+                    "env": ["PATH=/usr/bin:/bin"],
+                    "files": [
+                        {"content": ""},  # 0: stdin
+                        {"name": "stdout", "max": 10240},  # 1: stdout
+                        {"name": "stderr", "max": 10240}  # 2: stderr (编译错误会在这里)
+                    ],
+                    "cpuLimit": 10000000000,  # 10秒编译时间
+                    "memoryLimit": settings.MEMORY_LIMIT_BYTES,
+                    "procLimit": 50,
+                    # 关键：把代码写入文件
+                    "copyIn": {
+                        "main.cpp": {"content": code}
+                    },
+                    # 关键：缓存编译好的 'main' 文件，供下一步使用
+                    "copyOutCached": ["main"]
+                }]
+            }
+
+            res1 = await client.post(f"{settings.GO_JUDGE_BASE_URL}/run", json=compile_payload)
+            result1 = res1.json()[0]  # 拿到第一个命令的结果
+
+            # 1.1 检查编译是否成功
+            if result1['status'] != 'Accepted':
+                return JsonResponse({
+                    'status': 'Compile Error',
+                    'output': result1.get('files', {}).get('stderr', '编译失败，未知错误')
+                })
+
+            # 1.2 获取缓存的文件 ID
+            main_file_id = result1.get('fileIds', {}).get('main')
+            if not main_file_id:
+                return JsonResponse({'error': '编译成功但未生成可执行文件'}, status=500)
+
+            # ==========================================
+            # 第二步：运行请求
+            # ==========================================
+            run_payload = {
+                "cmd": [{
+                    "args": ["./main"],
+                    "env": ["PATH=/usr/bin:/bin"],
+                    "files": [
+                        {"content": user_input},  # 0: 用户输入
+                        {"name": "stdout", "max": 1024 * 1024},  # 1: 运行结果
+                        {"name": "stderr", "max": 1024 * 1024}  # 2: 运行时错误
+                    ],
+                    "cpuLimit": 2000000000,  # 2秒运行时间
+                    "memoryLimit": settings.MEMORY_LIMIT_BYTES,
+                    "stackLimit": settings.MEMORY_LIMIT_BYTES,
+                    "procLimit": 50,
+                    # 关键：使用上一步的 fileId 把可执行文件拷进来
+                    "copyIn": {
+                        "main": {"fileId": main_file_id}
+                    }
+                }]
+            }
+
+            res2 = await client.post(f"{settings.GO_JUDGE_BASE_URL}/run", json=run_payload)
+            result2 = res2.json()[0]
+
+            # ==========================================
+            # 第三步：清理缓存 (无论运行成功与否)
+            # ==========================================
+            await client.delete(f"{settings.GO_JUDGE_BASE_URL}/file/{main_file_id}")
+
+            # 组合输出
+            output = result2['files'].get('stdout', '')
+            error = result2['files'].get('stderr', '')
+            return JsonResponse({
+                'status': result2['status'],
+                'output': output + error,
+                'time': result2.get('time', 0) / 1000000,  # 纳秒 -> 毫秒
+                'memory': result2.get('memory', 0) / 1024  # 字节 -> KB
+            })
+    except Exception as e:
+        logger.exception(f"run_cpp_api error:  {e}")
+        return JsonResponse({'error': "服务器错误！"}, status=500)
+
+
+@require_POST
+def api_unlock_tool(request):
+    """验证密码并记录 Session"""
+    try:
+        data = json.loads(request.body)
+        tool_id = data.get('tool_id')
+        password = data.get('password')
+        tool = get_object_or_404(Tool, id=tool_id)
+        if tool.password == password:
+            # 密码正确，写入 Session
+            unlocked_list = request.session.get('unlocked_tools', [])
+            if tool_id not in unlocked_list:
+                unlocked_list.append(tool_id)
+                request.session['unlocked_tools'] = unlocked_list
+                request.session.modified = True  # 确保 Session 保存
+                request.session.set_expiry(0)   # 浏览器关闭立刻失效
+
+            return JsonResponse({'success': True})
+        else:
+            return JsonResponse({'success': False, 'message': '密码错误，请重试'})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': '服务器错误'})
+

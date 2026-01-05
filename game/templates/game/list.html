@@ -4,81 +4,52 @@
 
 {% block content %}
     <div class="space-y-16">
-
         <section>
-            <div class="flex items-center gap-3 mb-8">
-                <div class="p-2 bg-secondary/10 rounded-lg">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" /></svg>
-                </div>
-                <h2 class="text-3xl font-extrabold tracking-tight">本周热门</h2>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {% for game in hot_games %}
-                    <div class="card lg:card-side bg-base-100 shadow-xl border border-base-200 overflow-hidden group hover:shadow-2xl hover:border-secondary/30 transition-all duration-300">
-                        <figure class="lg:w-2/5 shrink-0 h-full relative overflow-hidden">
-                            {% if game.cover %}
-                                <img src="{{ game.cover.url }}" loading="lazy" alt="{{ game.title }}" class="h-full w-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                            {% else %}
-                                <div class="h-full w-full bg-neutral flex items-center justify-center text-neutral-content">
-                                    <span class="text-4xl">🎮</span>
-                                </div>
-                            {% endif %}
-
-                            <div class="absolute top-2 left-2">
-                                <span class="badge badge-secondary shadow-lg">HOT</span>
-                            </div>
-                        </figure>
-
-                        <div class="card-body">
-                            <h3 class="card-title text-2xl group-hover:text-secondary transition-colors">
-                                {{ game.title }}
-                            </h3>
-
-                            <div class="flex gap-2 my-2">
-                                {% if game.category %}
-                                    <span class="badge badge-outline text-xs">{{ game.category.name }}</span>
-                                {% endif %}
-                                {% for tag in game.tags.all|slice:":2" %}
-                                    <span class="badge badge-ghost badge-xs opacity-70">#{{ tag.name }}</span>
-                                {% endfor %}
-                            </div>
-
-                            <p class="text-sm opacity-70 line-clamp-3">
-                                {{ game.description|default:"暂无简介，快去体验一下吧！" }}
-                            </p>
-
-                            <div class="card-actions justify-end mt-4">
-                                <a href="{% url 'game:game_detail' game.slug %}" class="btn btn-secondary btn-sm">
-                                    立即试玩
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
-
-        <section>
-            <div class="flex items-center justify-between mb-8">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
                 <div class="flex items-center gap-3">
-                    <div class="p-2 bg-primary/10 rounded-lg">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    </div>
-                    <h2 class="text-3xl font-extrabold tracking-tight">最新发布</h2>
+                    <h1 class="text-3xl font-extrabold flex items-center gap-3">
+                        <span class="w-1.5 h-8 bg-primary rounded-full"></span>
+                        游戏列表
+                    </h1>
                 </div>
 
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-sm btn-ghost">
-                        筛选类型 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                <div class="flex gap-2 w-full md:w-auto justify-end">
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-sm btn-ghost gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+                            </svg>
+                            {% if current_sort == 'newest' %}最新发布
+                            {% elif current_sort == 'oldest' %}最早发布
+                            {% elif current_sort == 'hot' %}点赞最多
+                            {% elif current_sort == 'cold' %}点赞最少
+                            {% else %}排序方式{% endif %}
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <ul tabindex="0" class="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
+                            <li><a href="?sort=newest{% if current_category %}&category={{ current_category }}{% endif %}" class="{% if current_sort == 'newest' %}active{% endif %}">最新发布 (默认)</a></li>
+                            <li><a href="?sort=oldest{% if current_category %}&category={{ current_category }}{% endif %}" class="{% if current_sort == 'oldest' %}active{% endif %}">最早发布</a></li>
+                            <li><a href="?sort=hot{% if current_category %}&category={{ current_category }}{% endif %}" class="{% if current_sort == 'hot' %}active{% endif %}">点赞最多</a></li>
+                            <li><a href="?sort=cold{% if current_category %}&category={{ current_category }}{% endif %}" class="{% if current_sort == 'cold' %}active{% endif %}">点赞最少</a></li>
+                        </ul>
                     </div>
-                    <ul tabindex="0" class="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
-                        <li><a href="{% url 'game:game_list' %}">全部</a></li>
-                        {% for category in categories %}
-                            <li><a href="?category={{ category.slug }}">{{ category.name }}</a></li>
-                        {% endfor %}
-                    </ul>
+
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0" role="button" class="btn btn-sm btn-ghost gap-1">
+                            筛选类型 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-50" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                        </div>
+                        <ul tabindex="0" class="dropdown-content z-1 menu p-2 shadow bg-base-100 rounded-box w-52">
+                            <li><a href="?category={% if current_sort %}&sort={{ current_sort }}{% endif %}" class="{% if not current_category %}active{% endif %}">全部</a></li>
+                            {% for category in categories %}
+                                <li>
+                                    <a href="?category={{ category.slug }}{% if current_sort %}&sort={{ current_sort }}{% endif %}"
+                                       class="{% if current_category == category.slug %}active{% endif %}">
+                                        {{ category.name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
 
@@ -86,6 +57,8 @@
                 {% for game in latest_games %}
                     <div class="card bg-base-100 shadow-sm border border-base-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group">
                         <figure class="aspect-[4/3] relative overflow-hidden bg-base-300">
+                            <a href="{% url 'game:game_detail' game.slug %}" class="absolute inset-0 z-10" aria-label="查看 {{ game.title }}"></a>
+
                             {% if game.cover %}
                                 <img src="{{ game.cover.url }}" loading="lazy" alt="{{ game.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                             {% else %}
@@ -94,16 +67,18 @@
                                 </div>
                             {% endif %}
 
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                                <a href="{% url 'game:game_detail' game.slug %}" class="btn btn-circle btn-primary scale-0 group-hover:scale-100 transition-transform duration-300 delay-75">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px] pointer-events-none z-20">
+                                <span class="btn btn-circle btn-primary scale-0 group-hover:scale-100 transition-transform duration-300 delay-75">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                                </a>
+                                </span>
                             </div>
                         </figure>
 
-                        <div class="card-body p-4 gap-1">
+                        <div class="card-body p-4 gap-1 relative">
                             <div class="flex justify-between items-start">
-                                <h3 class="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors">{{ game.title }}</h3>
+                                <h3 class="font-bold text-lg leading-tight truncate group-hover:text-primary transition-colors">
+                                    <a href="{% url 'game:game_detail' game.slug %}">{{ game.title }}</a>
+                                </h3>
                             </div>
 
                             <div class="text-xs text-base-content/60 flex items-center gap-2 mb-2">
@@ -123,13 +98,12 @@
                     </div>
                 {% endfor %}
             </div>
+
             {% if latest_games.paginator.num_pages > 1 %}
                 <div class="flex justify-center mt-12">
                     <div class="join">
-
                         {% if latest_games.has_previous %}
-                            <a href="?page={{ latest_games.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}"
-                               class="join-item btn btn-md">«</a>
+                            <a href="?page={{ latest_games.previous_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="join-item btn btn-md">«</a>
                         {% else %}
                             <button class="join-item btn btn-md btn-disabled">«</button>
                         {% endif %}
@@ -138,24 +112,20 @@
                             {% if page_num == latest_games.paginator.ELLIPSIS %}
                                 <button class="join-item btn btn-md btn-disabled">...</button>
                             {% else %}
-                                <a href="?page={{ page_num }}{% if current_category %}&category={{ current_category }}{% endif %}"
-                                   class="join-item btn btn-md {% if page_num == latest_games.number %}btn-primary btn-active{% endif %}">
+                                <a href="?page={{ page_num }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="join-item btn btn-md {% if page_num == latest_games.number %}btn-primary btn-active{% endif %}">
                                     {{ page_num }}
                                 </a>
                             {% endif %}
                         {% endfor %}
 
                         {% if latest_games.has_next %}
-                            <a href="?page={{ latest_games.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}"
-                               class="join-item btn btn-md">»</a>
+                            <a href="?page={{ latest_games.next_page_number }}{% if current_category %}&category={{ current_category }}{% endif %}{% if current_sort %}&sort={{ current_sort }}{% endif %}" class="join-item btn btn-md">»</a>
                         {% else %}
                             <button class="join-item btn btn-md btn-disabled">»</button>
                         {% endif %}
-
                     </div>
                 </div>
             {% endif %}
         </section>
-
     </div>
 {% endblock %}

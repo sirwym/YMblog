@@ -16,5 +16,8 @@
     "daisyui": "^5.5.14",
     "postcss": "^8.5.6",
     "tailwindcss": "^4.1.18"
+  },
+  "dependencies": {
+    "monaco-editor": "^0.44.0"
   }
 }
