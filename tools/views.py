@@ -1,18 +1,25 @@
 from django.shortcuts import render,get_object_or_404
 import json
 import httpx
-import re # 引入正则处理版本号
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-
+from .ai_utils import generate_gen_script
+from .judge_utils import compile_solution_cached, batch_generate_and_run
+import uuid
+import zipfile
+import io
+from django.core.cache import cache
+from django.http import HttpResponse
 from .models import Tool
 import logging
 from django.conf import settings
 
 logger = logging.getLogger(__name__)
 
-
+######################################################################
+# 在线C++工具
+######################################################################
 def check_tool_permission(request, tool_url_name):
     """
     检查工具是否需要密码，以及用户是否已解锁
@@ -34,7 +41,6 @@ def check_tool_permission(request, tool_url_name):
         return tool, True  # 已经解锁过
 
     return tool, False  # 需要密码且未解锁
-
 
 def tool_dashboard(request):
     """工具箱显示页"""
@@ -121,7 +127,7 @@ async def run_cpp_api(request):
                     ],
                     "cpuLimit": 10000000000,  # 10秒编译时间
                     "memoryLimit": settings.MEMORY_LIMIT_BYTES,
-                    "procLimit": 50,
+                    "procLimit": 10,
                     # 关键：把代码写入文件
                     "copyIn": {
                         "main.cpp": {"content": code}
@@ -161,7 +167,7 @@ async def run_cpp_api(request):
                     "cpuLimit": 2000000000,  # 2秒运行时间
                     "memoryLimit": settings.MEMORY_LIMIT_BYTES,
                     "stackLimit": settings.MEMORY_LIMIT_BYTES,
-                    "procLimit": 50,
+                    "procLimit": 6,
                     # 关键：使用上一步的 fileId 把可执行文件拷进来
                     "copyIn": {
                         "main": {"fileId": main_file_id}
@@ -214,3 +220,106 @@ def api_unlock_tool(request):
     except Exception as e:
         return JsonResponse({'success': False, 'message': '服务器错误'})
 
+######################################################################
+# AI测试数据生成
+######################################################################
+
+def testcase_generator(request):
+    """AI生成数据页面"""
+    return render(request, "tools/testcase_gen.html")
+
+
+async def api_ai_generate(request):
+    """AI 生成 gen.py"""
+    if request.method != 'POST':
+        return JsonResponse({'error': '405'}, status=405)
+    data = json.loads(request.body)
+
+    desc = data.get('description', '')
+    sol = data.get('solution', '')
+
+    gen_code, val_code = await generate_gen_script(desc, sol)
+    return JsonResponse({'gen_code': gen_code, 'val_code': val_code})
+
+
+# API: 运行测试并缓存结果
+async def api_run_testgen(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': '405'}, status=405)
+
+    data = json.loads(request.body)
+    sol_code = data.get('solution', '')
+    gen_code = data.get('gen_code', '')
+    val_code = data.get('val_code', '')
+    count = int(data.get('count', 1))
+    if count < 1:
+        count = 1
+
+
+    file_id, error = await compile_solution_cached(sol_code)
+    if not file_id: return JsonResponse({'status': 'Compile Error', 'error': error})
+
+    try:
+        results = await batch_generate_and_run(gen_code, val_code, file_id, count)
+        # --- ZIP 打包逻辑 ---
+        # 生成一个唯一的下载 ID
+        zip_uuid = str(uuid.uuid4())
+
+        # 将完整数据存入缓存 (设置 10 分钟过期)
+        # 为了前端轻量化，我们把 full_input/output 从 results 移出存到 cache
+        cache_data = []
+        frontend_results = []
+
+        for res in results:
+            # 存入缓存的数据
+            if res['status'] == 'Accepted':
+                cache_data.append({
+                    'id': res['id'],
+                    'input': res.pop('full_input'),  # 移除完整数据，不发给前端
+                    'output': res.pop('full_output')  # 移除完整数据
+                })
+            else:
+                # 错误的数据也要移除 key 防止报错
+                res.pop('full_input', None)
+                res.pop('full_output', None)
+
+            frontend_results.append(res)
+
+        # 存入 Redis/LocMemCache
+        await cache.aset(f"testgen_zip_{zip_uuid}", cache_data, timeout=600)
+
+        return JsonResponse({
+            'status': 'OK',
+            'results': frontend_results,  # 轻量级结果
+            'zip_id': zip_uuid  # 下载凭证
+        })
+
+    except Exception as e:
+        logger.exception(f"run_cpp_api error:  {e}")
+        return JsonResponse({'status': 'Error', 'error': str(e)})
+
+
+# 新增 View: 下载 ZIP
+def download_testcase_zip(request, zip_id):
+    """根据 ID 打包下载"""
+    # 注意：这里用同步缓存获取，因为 Django view 默认同步
+    # 如果用 async view，这里要 await cache.aget
+    data = cache.get(f"testgen_zip_{zip_id}")
+
+    if not data:
+        return HttpResponse("下载链接已过期或无效", status=404)
+
+    # 在内存中创建 ZIP
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for item in data:
+            idx = item['id']
+            # 写入 input (如 1.in)
+            zip_file.writestr(f"{idx}.in", item['input'])
+            # 写入 output (如 1.out)
+            zip_file.writestr(f"{idx}.out", item['output'])
+
+    buffer.seek(0)
+    response = HttpResponse(buffer, content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="testcases_{zip_id[:8]}.zip"'
+    return response
