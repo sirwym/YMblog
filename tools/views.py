@@ -9,11 +9,13 @@ from .judge_utils import compile_solution_cached, batch_generate_and_run
 import uuid
 import zipfile
 import io
+from celery.result import AsyncResult
 from django.core.cache import cache
 from django.http import HttpResponse
 from .models import Tool
 import logging
 from django.conf import settings
+from .tasks import task_ai_generate
 
 logger = logging.getLogger(__name__)
 
@@ -230,16 +232,50 @@ def testcase_generator(request):
 
 
 async def api_ai_generate(request):
-    """AI 生成 gen.py"""
+    """
+    前端点击“生成”时调用此接口 使用celery
+    """
     if request.method != 'POST':
         return JsonResponse({'error': '405'}, status=405)
-    data = json.loads(request.body)
 
+    data = json.loads(request.body)
     desc = data.get('description', '')
     sol = data.get('solution', '')
 
-    gen_code, val_code = await generate_gen_script(desc, sol)
-    return JsonResponse({'gen_code': gen_code, 'val_code': val_code})
+    # 启动异步任务 (非阻塞)
+    # 使用 .delay() 方法，这会立刻返回一个 AsyncResult 对象
+    task = task_ai_generate.delay(desc, sol)
+
+    # 秒回 task_id 给前端，前端去转圈圈
+    return JsonResponse({'task_id': task.id})
+
+def api_check_task(request):
+    """
+    前端轮询此接口检查任务状态
+    """
+    task_id = request.GET.get('task_id')
+    if not task_id:
+        return JsonResponse({'status': 'Error', 'error': 'No task_id'})
+
+    # 查询 Celery 结果
+    result = AsyncResult(task_id)
+
+    if result.state == 'PENDING':
+        response = {'state': 'PENDING', 'status': '排队中...'}
+    elif result.state == 'STARTED':
+        response = {'state': 'STARTED', 'status': 'AI 思考中...'}
+    elif result.state == 'SUCCESS':
+        # 任务成功，result.result 就是 tasks.py 里 return 的字典
+        response = {
+            'state': 'SUCCESS',
+            'result': result.result
+        }
+    elif result.state == 'FAILURE':
+        response = {'state': 'FAILURE', 'error': str(result.info)}
+    else:
+        response = {'state': result.state}
+
+    return JsonResponse(response)
 
 
 # API: 运行测试并缓存结果

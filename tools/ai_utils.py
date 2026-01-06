@@ -132,7 +132,7 @@ async def generate_gen_script(description, solution):
         content = response.choices[0].message.content
         # 清洗可能存在的 markdown
         content = content.replace("```json", "").replace("```", "").strip()
-
+        logger.error(content)
         data = json.loads(content)
         return data.get('gen_code', ''), data.get('val_code', '')
 

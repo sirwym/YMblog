@@ -18,5 +18,6 @@ urlpatterns = [
     path('api-ai-generate/', views.api_ai_generate, name='api_ai_generate'),
     path('api-run-testgen/', views.api_run_testgen, name='api_run_testgen'),
     path('api/download-zip/<str:zip_id>/', views.download_testcase_zip, name='download_zip'),
+    path('api/check-task/', views.api_check_task, name='api_check_task'),
 
 ]

@@ -231,26 +231,68 @@ pass`,
 
         async askAI() {
             if (!this.description) { alert('请先填写题目描述'); this.activeTab = 'desc'; return; }
+
             this.aiLoading = true;
+            this.genCode = ""; // 清空旧数据
+
             try {
-                const res = await fetch('{% url "tools:api_ai_generate" %}', {
+                // 1. 发起任务，获取 task_id
+                const startRes = await fetch('{% url "tools:api_ai_generate" %}', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}'},
                     body: JSON.stringify({ description: this.description, solution: this.solutionCode })
                 });
-                const data = await res.json();
-                if(data.gen_code) {
-                    this.genCode = data.gen_code;
-                    this.activeTab = 'gen';
+                const startData = await startRes.json();
+
+                if (!startData.task_id) {
+                    throw new Error("未能启动任务");
                 }
-                if(data.val_code) {
-                    this.valCode = data.val_code;
-                }
+
+                // 2. 开始轮询 (Polling)
+                await this.pollTask(startData.task_id);
+
             } catch(e) {
-                alert('AI 生成失败: ' + e);
-            } finally {
+                alert('AI 请求失败: ' + e);
                 this.aiLoading = false;
             }
+        },
+
+        async pollTask(taskId) {
+            const pollInterval = 2000; // 每2秒查一次
+
+            const check = async () => {
+                try {
+                    const res = await fetch(`{% url "tools:api_check_task" %}?task_id=${taskId}`);
+                    const data = await res.json();
+
+                    if (data.state === 'SUCCESS') {
+                        // 任务完成！
+                        const result = data.result;
+                        if (result.status === 'OK') {
+                            if(result.gen_code) {
+                                this.genCode = result.gen_code;
+                                this.activeTab = 'gen';
+                            }
+                            if(result.val_code) this.valCode = result.val_code;
+                        } else {
+                            alert('AI 生成出错: ' + (result.error || '未知错误'));
+                        }
+                        this.aiLoading = false; // 停止转圈
+                    } else if (data.state === 'FAILURE') {
+                        alert('任务失败: ' + data.error);
+                        this.aiLoading = false;
+                    } else {
+                        // 还在跑 (PENDING / STARTED)，继续轮询
+                        setTimeout(check, pollInterval);
+                    }
+                } catch (e) {
+                    console.error("轮询出错", e);
+                    // 网络抖动不应该直接停止，可以重试，或者设置最大重试次数
+                    setTimeout(check, pollInterval);
+                }
+            };
+
+            check(); // 启动第一次检查
         },
 
         async startGeneration() {

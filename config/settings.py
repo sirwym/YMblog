@@ -592,3 +592,13 @@ if not DEBUG:
     # 5. 信任的代理设置 (配合 Nginx 使用)
     # 告诉 Django 它是运行在 Nginx 代理后面的，信任 Nginx 传来的 HTTPS 头
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+######################################################################
+# 异步设置
+######################################################################
+CELERY_BROKER_URL = 'redis://127.0.0.1:6379/2'  # 任务队列
+CELERY_RESULT_BACKEND = 'redis://127.0.0.1:6379/3' # 结果存储
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Shanghai'
