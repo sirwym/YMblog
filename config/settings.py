@@ -602,3 +602,10 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Shanghai'
+
+
+######################################################################
+# session
+######################################################################
+# 每次请求都重新保存 Session
+SESSION_SAVE_EVERY_REQUEST = True

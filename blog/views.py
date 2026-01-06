@@ -54,7 +54,7 @@ def post_detail(request, slug):
         input_password = request.POST.get('password')
         if input_password == post.password:
             request.session[unlock_session_key] = True
-            request.session.set_expiry(0)
+            request.session.set_expiry(3600)
             return redirect('blog:post_detail', slug=slug)
         else:
             error_message = "访问密码错误，请重新输入"

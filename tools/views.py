@@ -4,10 +4,10 @@ import httpx
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from .ai_utils import generate_gen_script
 from .judge_utils import compile_solution_cached, batch_generate_and_run
 import uuid
 import zipfile
+import os
 import io
 from celery.result import AsyncResult
 from django.core.cache import cache
@@ -214,7 +214,7 @@ def api_unlock_tool(request):
                 unlocked_list.append(tool_id)
                 request.session['unlocked_tools'] = unlocked_list
                 request.session.modified = True  # 确保 Session 保存
-                request.session.set_expiry(0)   # 浏览器关闭立刻失效
+                request.session.set_expiry(3600)   # 60分钟无操作自动过期
 
             return JsonResponse({'success': True})
         else:
@@ -228,6 +228,12 @@ def api_unlock_tool(request):
 
 def testcase_generator(request):
     """AI生成数据页面"""
+    tool, allowed = check_tool_permission(request, 'testcase_generator')
+
+    # 如果被锁住，渲染锁屏页面
+    if tool and not allowed:
+        return render(request, "tools/lock_screen.html", {"tool": tool})
+
     return render(request, "tools/testcase_gen.html")
 
 
@@ -287,10 +293,11 @@ async def api_run_testgen(request):
     sol_code = data.get('solution', '')
     gen_code = data.get('gen_code', '')
     val_code = data.get('val_code', '')
-    count = int(data.get('count', 1))
+    count = int(data.get('count', 5))
     if count < 1:
         count = 1
-
+    if count > 20:
+        count = 20
 
     file_id, error = await compile_solution_cached(sol_code)
     if not file_id: return JsonResponse({'status': 'Compile Error', 'error': error})
@@ -317,6 +324,7 @@ async def api_run_testgen(request):
             frontend_results.append(res)
 
         cache_payload = {
+            'solution': sol_code,
             'gen_code': gen_code,
             'val_code': val_code,
             'cases': test_cases
@@ -335,41 +343,71 @@ async def api_run_testgen(request):
         logger.exception(f"run_cpp_api error:  {e}")
         return JsonResponse({'status': 'Error', 'error': str(e)})
 
+    finally:
+        # 删除编译好的标程二进制文件
+        try:
+            async with httpx.AsyncClient() as client:
+                await client.delete(f"{settings.GO_JUDGE_BASE_URL}/file/{file_id}")
+        except Exception as cleanup_error:
+            pass
+
 
 def download_testcase_zip(request, zip_id):
     """根据 ID 打包下载"""
-    # 获取缓存数据
     cache_data = cache.get(f"testgen_zip_{zip_id}")
 
     if not cache_data:
         return HttpResponse("下载链接已过期或无效", status=404)
 
-    # 兼容旧版本缓存格式（如果有些数据是旧代码生成的列表格式，防止报错）
+    # 兼容性处理
     if isinstance(cache_data, list):
         cases = cache_data
         gen_code = ""
         val_code = ""
+        sol_code = ""  # 旧缓存可能没有
     else:
         cases = cache_data.get('cases', [])
         gen_code = cache_data.get('gen_code', '')
         val_code = cache_data.get('val_code', '')
+        sol_code = cache_data.get('solution', '')  # <--- 获取标程
 
-    # 在内存中创建 ZIP
+    # 用于记录需要删除的临时文件路径
+    temp_files_to_clean = []
+
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        if gen_code:
-            zip_file.writestr("gen.py", gen_code)
+        # 1. 写入代码文件
+        if gen_code: zip_file.writestr("gen.py", gen_code)
+        if val_code: zip_file.writestr("val.py", val_code)
+        if sol_code: zip_file.writestr("sol.cpp", sol_code)
 
-        if val_code:
-            zip_file.writestr("val.py", val_code)
-
+        # 2. 写入测试点
         for item in cases:
             idx = item['id']
-            # 写入 input (如 1.in)
-            zip_file.writestr(f"{idx}.in", item['input'])
-            # 写入 output (如 1.out)
-            zip_file.writestr(f"{idx}.out", item['output'])
 
+            # --- 处理 Input ---
+            inp_content = item.get('input', '')
+            if inp_content and inp_content.startswith("__FILE_PATH__:"):
+                file_path = inp_content.split(":", 1)[1]
+                if os.path.exists(file_path):
+                    zip_file.write(file_path, arcname=f"{idx}.in")
+                    temp_files_to_clean.append(file_path)
+                else:
+                    zip_file.writestr(f"{idx}.in", "Error: Temp file missing (expired?)")
+            else:
+                zip_file.writestr(f"{idx}.in", inp_content)
+
+            # --- 处理 Output ---
+            # 如果 output 也是文件路径模式，同理处理（目前假设 output 是字符串）
+            zip_file.writestr(f"{idx}.out", item.get('output', ''))
+
+    # 3. 打包完成后，删除临时文件
+    for f_path in temp_files_to_clean:
+        try:
+            if os.path.exists(f_path):
+                os.remove(f_path)
+        except Exception as e:
+            pass
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/zip')
     response['Content-Disposition'] = f'attachment; filename="testcases_{zip_id[:8]}.zip"'
