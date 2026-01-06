@@ -297,32 +297,33 @@ async def api_run_testgen(request):
 
     try:
         results = await batch_generate_and_run(gen_code, val_code, file_id, count)
-        # --- ZIP 打包逻辑 ---
-        # 生成一个唯一的下载 ID
-        zip_uuid = str(uuid.uuid4())
 
-        # 将完整数据存入缓存 (设置 10 分钟过期)
-        # 为了前端轻量化，我们把 full_input/output 从 results 移出存到 cache
-        cache_data = []
+        # --- ZIP 打包逻辑 ---
+        zip_uuid = str(uuid.uuid4())
+        test_cases = []
         frontend_results = []
 
         for res in results:
-            # 存入缓存的数据
             if res['status'] == 'Accepted':
-                cache_data.append({
+                test_cases.append({
                     'id': res['id'],
-                    'input': res.pop('full_input'),  # 移除完整数据，不发给前端
-                    'output': res.pop('full_output')  # 移除完整数据
+                    'input': res.pop('full_input'),
+                    'output': res.pop('full_output')
                 })
             else:
-                # 错误的数据也要移除 key 防止报错
                 res.pop('full_input', None)
                 res.pop('full_output', None)
 
             frontend_results.append(res)
 
+        cache_payload = {
+            'gen_code': gen_code,
+            'val_code': val_code,
+            'cases': test_cases
+        }
+
         # 存入 Redis/LocMemCache
-        await cache.aset(f"testgen_zip_{zip_uuid}", cache_data, timeout=600)
+        await cache.aset(f"testgen_zip_{zip_uuid}", cache_payload, timeout=600)
 
         return JsonResponse({
             'status': 'OK',
@@ -335,20 +336,34 @@ async def api_run_testgen(request):
         return JsonResponse({'status': 'Error', 'error': str(e)})
 
 
-# 新增 View: 下载 ZIP
 def download_testcase_zip(request, zip_id):
     """根据 ID 打包下载"""
-    # 注意：这里用同步缓存获取，因为 Django view 默认同步
-    # 如果用 async view，这里要 await cache.aget
-    data = cache.get(f"testgen_zip_{zip_id}")
+    # 获取缓存数据
+    cache_data = cache.get(f"testgen_zip_{zip_id}")
 
-    if not data:
+    if not cache_data:
         return HttpResponse("下载链接已过期或无效", status=404)
+
+    # 兼容旧版本缓存格式（如果有些数据是旧代码生成的列表格式，防止报错）
+    if isinstance(cache_data, list):
+        cases = cache_data
+        gen_code = ""
+        val_code = ""
+    else:
+        cases = cache_data.get('cases', [])
+        gen_code = cache_data.get('gen_code', '')
+        val_code = cache_data.get('val_code', '')
 
     # 在内存中创建 ZIP
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        for item in data:
+        if gen_code:
+            zip_file.writestr("gen.py", gen_code)
+
+        if val_code:
+            zip_file.writestr("val.py", val_code)
+
+        for item in cases:
             idx = item['id']
             # 写入 input (如 1.in)
             zip_file.writestr(f"{idx}.in", item['input'])

@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}404 - 页面未找到{% endblock %}
+
+{% block content %}
+<div class="hero min-h-[70vh] bg-base-200">
+  <div class="hero-content text-center">
+    <div class="max-w-md">
+      <h1 class="text-9xl font-bold text-primary opacity-20">404</h1>
+      
+      <div class="-mt-12 relative z-10">
+        <h2 class="text-3xl font-bold text-base-content">页面迷路了</h2>
+        <p class="py-6 text-base-content/70">
+          抱歉，我们找不到您要访问的页面。<br>
+          可能是网址输错了，或者该页面已被移除。
+        </p>
+        
+        <div class="flex justify-center gap-4">
+            <button onclick="history.back()" class="btn btn-outline">
+                返回上一页
+            </button>
+            <a href="{% url 'core:index' %}" class="btn btn-primary">
+                回到首页
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
