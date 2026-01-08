@@ -234,7 +234,7 @@ def testcase_generator(request):
     if tool and not allowed:
         return render(request, "tools/lock_screen.html", {"tool": tool})
 
-    return render(request, "tools/testcase_gen.html")
+    return render(request, "tools/testcase_gen.html", {"tool": tool})
 
 
 async def api_ai_generate(request):
@@ -247,10 +247,11 @@ async def api_ai_generate(request):
     data = json.loads(request.body)
     desc = data.get('description', '')
     sol = data.get('solution', '')
+    mode = data.get('mode', 'algo')
 
     # 启动异步任务 (非阻塞)
     # 使用 .delay() 方法，这会立刻返回一个 AsyncResult 对象
-    task = task_ai_generate.delay(desc, sol)
+    task = task_ai_generate.delay(desc, sol, mode)
 
     # 秒回 task_id 给前端，前端去转圈圈
     return JsonResponse({'task_id': task.id})

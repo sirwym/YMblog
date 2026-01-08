@@ -7,20 +7,21 @@ import logging
 logger = logging.getLogger(__name__)
 
 @shared_task
-def task_ai_generate(description, solution):
+def task_ai_generate(description, solution, mode):
     """
     Celery 异步任务：调用 AI 生成代码
     """
     try:
-        # 将异步函数转换为同步调用
-        gen_code, val_code = async_to_sync(generate_gen_script)(description, solution)
+        result_dict = async_to_sync(generate_gen_script)(description, solution, mode)
         return {
             'status': 'OK',
-            'gen_code': gen_code,
-            'val_code': val_code
+            'gen_code': result_dict.get('gen_code', ''),
+            'val_code': result_dict.get('val_code', ''),
+            'analysis': result_dict.get('analysis', ''),
+            'plan': result_dict.get('plan', '')
         }
     except Exception as e:
-        logger.error(f"Task Failed: {e}")
+        logger.exception(f"Task Failed: {e}")
         return {
             'status': 'Error',
             'error': str(e)

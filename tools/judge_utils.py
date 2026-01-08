@@ -11,11 +11,6 @@ LARGE_FILE_THRESHOLD = 1024 * 1024  # 1MB 阈值
 PREVIEW_SIZE = 4096                 # 4KB
 
 # ==========================================
-#  全局并发控制 (新增)
-# ==========================================
-SEM = asyncio.Semaphore(5)
-
-# ==========================================
 # 核心：Python 驱动脚本
 # ==========================================
 DRIVER_SCRIPT = r"""
@@ -24,38 +19,24 @@ import subprocess
 import os
 
 def main():
-    # --- Step 1: 运行生成器 (流式接管) ---
+    # --- Step 1: 运行生成器 ---
     cmd_gen = [sys.executable, "gen.py"] + sys.argv[1:]
 
     try:
-        # 打开文件准备写入
         with open("case.in", "wb") as f_out:
-            # 启动进程，管道连接 stdout
-            proc = subprocess.Popen(cmd_gen, stdout=subprocess.PIPE, stderr=sys.stderr)
+            # check=True 会在进程返回非0时抛出 CalledProcessError
+            subprocess.run(cmd_gen, stdout=f_out, stderr=sys.stderr, check=True)
 
-            while True:
-                chunk = proc.stdout.read(1024 * 64) # 每次读 64KB
-                if not chunk:
-                    break
-                f_out.write(chunk)
-
-            # 等待进程结束
-            proc.wait()
-
-            # 确保落盘
-            f_out.flush()
-            os.fsync(f_out.fileno())
-
-        if proc.returncode != 0:
-            sys.stderr.write(f"\n[Driver] Generator Exit: {proc.returncode}\n")
-            sys.exit(proc.returncode)
-
+    except subprocess.CalledProcessError as e:
+        sys.stderr.write(f"\n[Driver] Generator Exit: {e.returncode}\n")
+        sys.exit(e.returncode)
     except Exception as e:
         sys.stderr.write(f"\n[Driver] Error: {e}\n")
         sys.exit(1)
 
     # --- Step 2: 运行校验器 ---
     if os.path.exists("val.py"):
+        # 校验器需要读文件，这里用 rb 打开传给 stdin
         with open("case.in", "rb") as f_in:
             cmd_val = [sys.executable, "val.py"]
             ret_val = subprocess.run(cmd_val, stdin=f_in, stderr=sys.stderr)
@@ -119,20 +100,22 @@ async def compile_solution_cached(code):
             logger.exception("Compile Error")
             return None, str(e)
 
-async def _run_pipeline_with_sem(*args, **kwargs):
+async def _run_pipeline_with_sem(sem, *args, **kwargs):
     """
     包装器：在运行前获取信号量锁
     """
-    async with SEM:
+    async with sem:
         return await _run_pipeline(*args, **kwargs)
 
 
 async def batch_generate_and_run(gen_code, val_code, sol_file_id, count=5):
+    sem = asyncio.Semaphore(5)
+
     tasks = []
     for i in range(count):
         seed = i + 1000
         scale = pick_scale(count, i)
-        tasks.append(_run_pipeline_with_sem(gen_code, val_code, sol_file_id, seed, scale, i + 1))
+        tasks.append(_run_pipeline_with_sem(sem,gen_code, val_code, sol_file_id, seed, scale, i + 1))
     return await asyncio.gather(*tasks)
 
 

@@ -11,98 +11,151 @@ client = AsyncOpenAI(
     base_url=settings.LLM_API_URL
 )
 
-# 修改 Prompt：请求 JSON 格式，包含 gen 和 val
-GEN_SCRIPT_PROMPT = r"""
-你是一个专业的算法竞赛出题人和数据设计专家。
-请根据【题目描述】和【标程】，生成两份 Python 3 代码：
+# ======================================================
+# 模块化 Prompt 组件 (v6.1)
+# ======================================================
 
-1. gen.py：测试数据生成器  
-2. val.py：测试数据校验器（Validator）
+Tick3 = "```"
 
-====================
-【gen.py 强制要求】
-====================
-1. 必须使用 Python 3，仅允许使用标准库。
-2. 必须 `import sys` 和 `import random`。
-3. 必须从命令行读取：
-   - sys.argv[1]：随机种子 seed（int）
-   - sys.argv[2]：数据规模 scale（int，0=小数据，1=大数据，2=极限数据）
-4. 必须使用 `random.seed(int(sys.argv[1]))` 初始化随机数。
-5. 必须输出 **符合题目输入格式** 的完整测试数据到 stdout。
-6. **【关键】Scale 定义**：
-   - `scale=0`：**边界与特殊情况**。包含题目允许的**最小 N**（注意：若题目要求“至少操作一次”，则 $N$ 不能太小导致天然有序）、最大/最小边界值、以及特殊构造（如完全相同、完全不同、交错等）。
-   - `scale=1`：随机中等规模数据。
-   - `scale=2`：极限规模数据（贴近题目最大限制）。
-7. 输出数据必须 **100% 符合** 题目格式。
-8. 禁止使用任何第三方库（如 numpy、networkx 等）。
-9. 避免使用可能导致递归深度错误的递归写法。
-10. 生成的数据应尽量覆盖容易导致错误算法失败的情况，例如：边界值、极端分布、退化结构、特殊顺序。
-11. 禁止无法保证终止的无限循环。
-    - Generate-Validate-Retry 模式允许使用 `while True`，
-    - 但必须在逻辑上保证有限次内成功（如规模受限、可修正构造）。
-12. **【关键逻辑】数值范围自洽**：
-    - 在生成“不重复”或“去重”序列时，必须保证随机数的取值范围 (`max_val`) **大于等于** 需要生成的数量。
-    - 示例防御代码：`max_val = max(needed_count, target_max_val)`，防止 `ValueError` 或生成重复值。
-13. **【关键逻辑】非平凡数据与约束自检**：
-    - **题目约束**：仔细阅读题目中的“数据保证”。例如，如果题目隐含 $N \ge 4$ 或“至少需要操作一次”，那么 `scale=0` 时绝不能生成 $N=2$。
-    - **强制破坏**：生成数据后，必须检查数据是否“天然”满足了题目目标（导致答案为0）。如果是，必须通过代码（如交换元素）来破坏这种完美状态。
-14. **【关键架构】生成-验证-重试模式 (Generate-Validate-Retry)**：
-    - 随机生成的数据很难一次性满足所有复杂约束（如连通性、非平凡性）。
-    - **必须**编写一个 `validate(data)` 函数，检查数据是否满足所有约束（包括第13点）。
-    - 在主逻辑中使用 `while True:` 循环：生成 -> 验证 -> 如果失败则 `continue` 重试 -> 如果成功则 `break` 并输出。
-15. **【关键输出】大数据安全输出**：
-    - ❌ **严禁**使用 `print(' '.join(map(str, huge_list)))`，这会导致内存溢出或IO截断。
-    - ✅ **必须**使用分批输出策略。
-    - 示例模板：
-      ```python
-      BATCH_SIZE = 1000
-      buffer = []
-      for x in sequence:
-          buffer.append(str(x))
-          if len(buffer) >= BATCH_SIZE:
-              sys.stdout.write(" ".join(buffer) + " ")
-              sys.stdout.flush() # 记得 flush
-              buffer = []
-      if buffer: sys.stdout.write(" ".join(buffer))
-      sys.stdout.write("\\n")
-      ```
-16. **【代码规范】中文注释**：
-    - 关键逻辑（如：数据构造思路、反向检查逻辑、特殊情况处理）**必须包含简练的中文注释**，以便人类理解生成思路。
+# 1. 通用头部
+COMMON_HEADER = r"""
+你是一个专业的算法竞赛出题专家。请根据【题目描述】和【标程】，生成 `gen.py` 和 `val.py`。
 
 ====================
-【val.py 强制要求】
+一、全局核心规范 (Global Standards)
 ====================
-1. 必须使用 Python 3，仅允许使用标准库。
-2. 必须从 **stdin** 读取 gen.py 生成的数据。推荐使用 `sys.stdin.read().split()` 一次性读取所有 token。
-3. 必须严格按照【题目描述】检查：
-   - 输入格式是否正确
-   - 所有数值是否在合法范围内
-   - 题目要求的结构性约束（如：图是否连通、无重边、树结构等）
-   - **特殊约束**：检查题目中提到的特殊保证（如“保证至少操作一次”）。
-4. **禁止**直接 return / pass / 打印提示信息。
-5. 如果数据合法：什么都不输出，正常结束 (exit 0)。
-6. 如果发现任何非法情况：
-   - 使用 `assert False` 或 `sys.exit(1)` 直接报错。
-7. 禁止使用任何第三方库。
-8. **【代码规范】中文注释**：关键校验步骤需添加中文注释。
+1. **输出格式**：必须 **仅返回一个 JSON 对象**。严禁包含 Markdown 代码块标记，严禁输出多余文本。
+2. **环境**：仅允许 Python 3 标准库 (`sys`, `random`)。禁止第三方库。
+3. **输入**：必须从命令行读取 `seed = int(sys.argv[1])`, `scale = int(sys.argv[2])`。
+4. **初始化**：必须执行 `random.seed(seed)`。
+
+5. **【关键】流式输出标准模板 (Stream Output)**：
+   为防止 OOM (内存溢出)，**必须**使用以下 `out/flush` 模式输出大规模数据：
+   """ + Tick3 + r"""python
+   import sys
+   BATCH = 1000
+   buffer = []
+   def out(x):
+       buffer.append(str(x))
+       if len(buffer) >= BATCH:
+           sys.stdout.write(" ".join(buffer) + " ")
+           sys.stdout.flush(); del buffer[:]
+   # 结束时务必刷新:
+   # if buffer: sys.stdout.write(" ".join(buffer)); sys.stdout.flush()
+   """ + Tick3 + r"""
+"""
+
+# 2. 差异化策略模块
+STRATEGIES = {
+    # ------------------------------------------------------------------
+    # 模式 A: 基础/入门题
+    # ------------------------------------------------------------------
+    "basic": r"""
+====================
+二、生成策略 (Basic Mode)
+====================
+1. **Scale 定义**：
+   - `scale=0` (边界)：**必须**包含题目允许的**最小 N** (如 $N=1,2$)、零值、负数、空行等边界。
+   - `scale=2` (极限)：题目允许的最大 N/M。
+2. **逻辑降级**：
+   - 若题目稍显复杂但处于 Basic 模式，**请放弃复杂构造**，转为生成大量边界值和纯随机数据，优先保证代码不报错。
+""",
+
+    # ------------------------------------------------------------------
+    # 模式 B: 常用算法
+    # ------------------------------------------------------------------
+    "algo": r"""
+====================
+二、生成策略 (Algo Mode)
+====================
+1. **Scale 定义**：
+   - `scale=0` (特殊)：**必须**构造全相同值、单调序列、回文串、二分值(0/1)等能卡掉贪心/暴力的分布。
+   - `scale=2` (极限)：**必须**取到题目允许的绝对最大值。
+   - **数值自洽**：生成去重序列时，确保 `max_val >= needed_count`。
+
+2. **非平凡性**：
+   - 检查数据是否“天然”导致答案为 0 或无解。如果是，**必须强制破坏**（如交换元素）以产生有效测试。
+
+3. **系统安全**：
+   - **递归保护**：若涉及 DFS/DP，必须执行 `sys.setrecursionlimit(300000)`。
+   - **OOM 防护**：严格使用前文提到的流式输出模板。
+""",
+
+    # ------------------------------------------------------------------
+    # 模式 C: 图论/树 (核心增强)
+    # ------------------------------------------------------------------
+    "graph": r"""
+====================
+二、生成策略 (Graph Expert Mode)
+====================
+1. **【核心】Killer Template Router (必须从下表中选择)**：
+   - 当 `scale=2` 时，**必须**混合使用以下至少一种高强度模板，严禁仅使用纯随机图。
+   - **强制要求**：在 `gen.py` 源码注释中明确写出使用了哪个模板（如 `# Template: Caterpillar`）。
+     [Tree]
+     - T1. Deep Chain (深链，卡递归爆栈)
+     - T2. Star/Broom (菊花/扫帚，卡重心/度数暴力)
+     - T3. Caterpillar (毛毛虫，卡树形DP/直径)
+     [Graph]
+     - G1. Grid/Lattice (网格图，卡搜索队列)
+     - G2. Cycle + Chord (环+弦，卡最短路)
+     - G3. Dense Block (局部稠密，卡边枚举)
+     - G4. Disconnected -> Connected (先生成森林再连通，卡连通性假设)
+     [DAG]
+     - D1. Layered DAG (分层图，卡DP顺序)
+     - D2. Reverse Topological (反直觉输入序)
+
+2. **构造规范**：
+   - **树**：必须使用 "Random Parent" ($p \in [1, i-1]$) + Shuffle。
+   - **连通图**：先生成树骨架 (Backbone)，再加随机边。
+   - **DAG**：先生成 Permutation，只允许小标号连向大标号。
+
+3. **架构要求 (G-V-R Pattern)**：
+   - 主循环 `while True` + `max_retries=20`。
+   - **保底策略**：若重试耗尽，回退到 T1 (Chain) 模板，**保证必须输出**。
+
+4. **val.py 特殊要求**：
+   - **连通性**：**严禁**递归 DFS。**必须**使用 **迭代式并查集 (Iterative DSU)** 或迭代 BFS。
+"""
+}
 
 
+COMMON_FOOTER = r"""
 ====================
- 强制一致性要求
+三、通用校验 (val.py)
 ====================
-- val.py 中校验的所有约束，必须都能在 gen.py 的 validate() 中被验证。
-- 禁止出现 val.py 检查了，但 gen.py 永远不会生成的分支。
+1. **读取**：推荐 `data = sys.stdin.read().split()`。
+2. **校验**：格式、范围、结构性约束、特殊保证。
+3. **一致性**：val.py 的校验逻辑必须在 gen.py 的 `validate()` 中自检。
+4. **退出码**：合法 exit(0)，非法 exit(1)。
 
 ====================
-【输出格式（非常重要）】
+四、思维链与输出规范 (CoT & Output)
 ====================
-必须 **仅返回一个合法 JSON 对象**，不要包含任何 markdown 或多余文本，格式如下：
+请严格按照以下步骤思考：
 
-{{
-    "gen_code": "完整的 gen.py 代码（字符串）",
-    "val_code": "完整的 val.py 代码（字符串）"
-}}
+1. **Phase 1: 题型识别**
+   - 识别题目类型及标程复杂度。
 
+2. **Phase 2: 模板选择**
+   - `scale=2` 时，从 Killer Template Router 中选择最具杀伤力的模板。
+
+3. **Phase 3: 代码实现**
+   - 编写 gen.py (包含 G-V-R 重试逻辑，流式输出)。
+   - 编写 val.py (使用 **迭代式** DSU/BFS)。
+
+====================
+【最终 JSON 返回结构】
+仅返回一个 JSON 对象，必须包含以下 Key：
+{
+    "analysis": "题目核心逻辑与边界分析 (100字内)",
+    "plan": "针对 scale 0/1/2 的生成策略简述",
+    "gen_code": "完整的 gen.py 代码字符串",
+    "val_code": "完整的 val.py 代码字符串"
+}
+
+"""
+
+DES_SOL = r"""
 ====================
 【题目描述】
 {description}
@@ -113,32 +166,52 @@ GEN_SCRIPT_PROMPT = r"""
 """
 
 
-async def generate_gen_script(description, solution):
+async def generate_gen_script(description, solution, mode="algo"):
     """
-    生成 gen.py 和 val.py
+    根据 mode 组装 Prompt，并调用 AI 生成代码
     """
-    user_content = GEN_SCRIPT_PROMPT.format(description=description, solution=solution)
+    # 1. 默认兜底
+    if mode not in STRATEGIES:
+        mode = "algo"
+
+    # 2. 动态组装 Prompt
+    strategy_content = STRATEGIES[mode]
+    task_context = DES_SOL.format(description=description, solution=solution)
+    full_prompt = COMMON_HEADER + strategy_content + COMMON_FOOTER + task_context
 
     try:
         response = await client.chat.completions.create(
-            model="deepseek-chat",  # 建议用 chat 模型输出 JSON，reasoner 容易输出废话
+            model="deepseek-chat",
             messages=[
                 {"role": "system", "content": "你是一个严谨的算法专家，只输出 JSON。"},
-                {"role": "user", "content": user_content},
+                {"role": "user", "content": full_prompt},
             ],
-            response_format={"type": "json_object"},  # 强制 JSON 模式 (如果模型支持)
+            response_format={"type": "json_object"},
             temperature=0.7
         )
         content = response.choices[0].message.content
-        # 清洗可能存在的 markdown
         content = content.replace("```json", "").replace("```", "").strip()
-        logger.error(content)
+        logger.info(f"AI Code Generated (Mode: {mode})")
+
+        # 解析返回的 JSON
         data = json.loads(content)
-        return data.get('gen_code', ''), data.get('val_code', '')
+
+        # 返回完整数据字典
+        return {
+            "gen_code": data.get('gen_code', ''),
+            "val_code": data.get('val_code', ''),
+            "analysis": data.get('analysis', 'AI 未提供分析'),
+            "plan": data.get('plan', 'AI 未提供计划')
+        }
 
     except Exception as e:
         logger.exception(f"AI 生成失败: {e}")
-        # 保底代码
-        fallback_gen = "import sys, random\nrandom.seed(int(sys.argv[1]) if len(sys.argv)>1 else 0)\nprint(10)"
+        # 保底返回
+        fallback_gen = "import sys, random\nrandom.seed(int(sys.argv[1]) if len(sys.argv)>1 else 0)\nprint(10)\nimport sys; sys.stdout.flush()"
         fallback_val = "import sys\n# 默认校验通过\npass"
-        return fallback_gen, fallback_val
+        return {
+            "gen_code": fallback_gen,
+            "val_code": fallback_val,
+            "analysis": "生成发生错误，已回退到保底模式。",
+            "plan": "Error Fallback"
+        }
