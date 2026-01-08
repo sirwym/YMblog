@@ -91,17 +91,36 @@
             </div>
         </div>
 
-        <div class="collapse collapse-arrow bg-base-200 mb-4 shrink-0">
+<div class="collapse collapse-arrow bg-base-200 mb-4 shrink-0">
             <input type="checkbox" />
             <div class="collapse-title text-sm font-medium py-2 min-h-0 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
-                使用说明 & 提示
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 text-info"><path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" /></svg>
+                <span>使用指南 & 评测限制</span>
             </div>
-            <div class="collapse-content text-xs opacity-70">
-                <p>1. 在 <b>题目描述</b> 中粘贴题面，在 <b>标准程序</b> 中粘贴正确的 C++ 代码。</p>
-                <p>2. 选择题目类型，点击 <b>AI生成代码</b>，自动编写生成器 (gen.py) 和校验器 (val.py)。</p>
-                <p>3. 检查代码无误后，点击 <b>运行测试</b>，系统将生成测试数据并验证标程。</p>
-                <p>4. 结果满意后可点击 <b>下载数据包</b> 获取 .zip 格式的测试点。</p>
+            <div class="collapse-content text-xs opacity-80 leading-relaxed">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                    <div>
+                        <h3 class="font-bold text-base-content mb-1">🚀 操作流程</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li><b>准备题目：</b>粘贴题面与正确的 C++ 标程 (Solution)。</li>
+                            <li><b>AI 生成：</b>选择题目类型，点击 <span class="badge badge-xs badge-neutral">1. AI生成代码</span>，自动编写生成器 (gen.py) 与校验器 (val.py)。</li>
+                            <li><b>人工修正 (重要)：</b>如果 AI 生成的代码有误（如报错或死循环），<b class="text-warning">您可以手动修改 Python 代码</b>，或将其复制给其他 AI 工具（如 ChatGPT/DeepSeek）修复后再粘贴回来。</li>
+                            <li><b>生成数据：</b>点击 <span class="badge badge-xs badge-primary">2. 运行测试</span>，系统将调用评测机批量生成数据并验题。</li>
+                            <li><b>下载：</b>确认为 Accepted 后，点击 <span class="badge badge-xs badge-success text-white">下载数据包</span> 获取 ZIP。</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-base-content mb-1">⚠️ 评测机限制 (Sandbox)</h3>
+                        <ul class="list-disc list-inside space-y-1 text-warning/90">
+                            <li><b>CPU 时间：</b>Python 生成器限时 <b>15秒</b> (避免死循环)。</li>
+                            <li><b>标程时间：</b>C++ 标程限时 <b>2秒</b> (-O2 开启)。</li>
+                            <li><b>内存限制：</b>最大 <b>512MB</b> (防止 OOM)。</li>
+                            <li><b>并发限制：</b>单次最多并发生成 3 组数据，请耐心等待。</li>
+                            <li><b>网络限制：</b>沙箱无外网权限，无法 pip install 第三方库。</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
         </div>
 

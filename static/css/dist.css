@@ -5013,6 +5013,12 @@
   .resize-none {
     resize: none;
   }
+  .list-inside {
+    list-style-position: inside;
+  }
+  .list-disc {
+    list-style-type: disc;
+  }
   .stats-horizontal {
     @layer daisyui.l1.l2 {
       grid-auto-flow: column;
@@ -5986,6 +5992,12 @@
     color: var(--color-warning);
     @supports (color: color-mix(in lab, red, red)) {
       color: color-mix(in oklab, var(--color-warning) 80%, transparent);
+    }
+  }
+  .text-warning\/90 {
+    color: var(--color-warning);
+    @supports (color: color-mix(in lab, red, red)) {
+      color: color-mix(in oklab, var(--color-warning) 90%, transparent);
     }
   }
   .text-white {
