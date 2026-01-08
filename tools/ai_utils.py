@@ -115,6 +115,11 @@ STRATEGIES = {
 
 4. **val.py 特殊要求**：
    - **连通性**：**严禁**递归 DFS。**必须**使用 **迭代式并查集 (Iterative DSU)** 或迭代 BFS。
+   
+5. **【关键】性能约束 (防止 TLE)**：
+   - 生成边时，**严禁**使用 `if (u, v) in edges_list` 进行查重（这是 $O(M^2)$ 复杂度）。
+   - **必须**使用 `set()` (哈希表) 记录已生成的边，确保查重复杂度为 $O(1)$。
+   - 示例：`used = set(); ... if (u,v) in used: continue; ... used.add((u,v))`。
 """
 }
 

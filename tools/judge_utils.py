@@ -8,7 +8,7 @@ import os
 logger = logging.getLogger(__name__)
 
 LARGE_FILE_THRESHOLD = 1024 * 1024  # 1MB 阈值
-PREVIEW_SIZE = 4096                 # 4KB
+PREVIEW_SIZE = 4096  # 4KB
 
 # ==========================================
 # 核心：Python 驱动脚本
@@ -73,7 +73,8 @@ def pick_scale(total_cases, idx):
 
 async def compile_solution_cached(code):
     """Step 1: 编译标程并缓存"""
-    async with httpx.AsyncClient() as client:
+    # 🌟 修改点1：增加 timeout，防止编译超时导致系统错误
+    async with httpx.AsyncClient(timeout=30.0) as client:
         payload = {
             "cmd": [{
                 "args": ["/usr/bin/g++", "sol.cpp", "-O2", "-std=c++14", "-o", "sol"],
@@ -97,8 +98,9 @@ async def compile_solution_cached(code):
             if result['status'] != 'Accepted': return None, result['files'].get('stderr', 'Compile Error')
             return result['fileIds']['sol'], None
         except Exception as e:
-            logger.exception("Compile Error")
+            logger.exception(f"Compile Error: {e}")
             return None, str(e)
+
 
 async def _run_pipeline_with_sem(sem, *args, **kwargs):
     """
@@ -109,18 +111,19 @@ async def _run_pipeline_with_sem(sem, *args, **kwargs):
 
 
 async def batch_generate_and_run(gen_code, val_code, sol_file_id, count=5):
+    # 🌟 核心修复：在当前事件循环中创建信号量，避免 EventLoop 绑定错误
     sem = asyncio.Semaphore(5)
 
     tasks = []
     for i in range(count):
         seed = i + 1000
         scale = pick_scale(count, i)
-        tasks.append(_run_pipeline_with_sem(sem,gen_code, val_code, sol_file_id, seed, scale, i + 1))
+        tasks.append(_run_pipeline_with_sem(sem, gen_code, val_code, sol_file_id, seed, scale, i + 1))
     return await asyncio.gather(*tasks)
 
 
 async def _run_pipeline(gen_code, val_code, sol_file_id, seed, scale, index):
-    async with httpx.AsyncClient() as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         # ==========================================
         # Step 1: 生成 + 校验 + 保存 (Driver 模式)
         # ==========================================
@@ -140,7 +143,7 @@ async def _run_pipeline(gen_code, val_code, sol_file_id, seed, scale, index):
                     {"name": "stdout", "max": 1024},
                     {"name": "stderr", "max": 4096}  # 捕获 Driver 的报错信息
                 ],
-                "cpuLimit": 5000000000,
+                "cpuLimit": 15000000000,
                 "memoryLimit": settings.MEMORY_LIMIT_BYTES,
                 "procLimit": 20,
                 "copyIn": copy_in,
@@ -159,11 +162,20 @@ async def _run_pipeline(gen_code, val_code, sol_file_id, seed, scale, index):
             if not gen_results: return _make_error_result(index, seed, "Judge Error", "Empty response")
             gen_data = gen_results[0]
 
+            # 🌟 修改点4：处理超时 (Exit Status 137/124) 或其他非0退出
             if gen_data['status'] != 'Accepted' or gen_data['exitStatus'] != 0:
                 err_msg = gen_data['files'].get('stderr', '')
-                if not err_msg: err_msg = f"Exit Code: {gen_data.get('exitStatus')}"
+                status_label = "Data Error"
+
+                # 细化错误类型
+                if gen_data['status'] == 'Time Limit Exceeded':
+                    status_label = "Gen TLE"
+                    err_msg = "Generator timed out (Python is too slow)"
+                elif not err_msg:
+                    err_msg = f"Exit Code: {gen_data.get('exitStatus')}"
+
                 if len(err_msg) > 800: err_msg = err_msg[:800] + "..."
-                return _make_error_result(index, seed, "Data Error", err_msg)
+                return _make_error_result(index, seed, status_label, err_msg)
 
             input_file_id = gen_data.get('fileIds', {}).get('case.in')
             if not input_file_id:
@@ -197,18 +209,19 @@ async def _run_pipeline(gen_code, val_code, sol_file_id, seed, scale, index):
 
             except Exception:
                 input_preview = "Preview Fetch Failed"
-                if scale >= 2: total_size = 999999999 # 保底
+                if scale >= 2: total_size = 999999999  # 保底
 
             if total_size > LARGE_FILE_THRESHOLD:
                 # 大数据模式：落盘
                 try:
                     fd, temp_path = tempfile.mkstemp(suffix=".in")
                     os.close(fd)
+                    # 🌟 修改点5：下载大文件时也使用 stream，避免内存爆炸
                     async with client.stream("GET", f"{settings.GO_JUDGE_BASE_URL}/file/{input_file_id}") as resp:
                         if resp.status_code == 200:
                             with open(temp_path, "wb") as f:
                                 async for chunk in resp.aiter_bytes():
-                                        f.write(chunk)
+                                    f.write(chunk)
                             input_full_str = f"__FILE_PATH__:{temp_path}"
                         else:
                             input_full_str = "Download Failed"
