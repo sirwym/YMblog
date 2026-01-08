@@ -74,7 +74,7 @@ def pick_scale(total_cases, idx):
 async def compile_solution_cached(code):
     """Step 1: 编译标程并缓存"""
     # 🌟 修改点1：增加 timeout，防止编译超时导致系统错误
-    async with httpx.AsyncClient(timeout=30.0) as client:
+    async with httpx.AsyncClient(timeout=60.0) as client:
         payload = {
             "cmd": [{
                 "args": ["/usr/bin/g++", "sol.cpp", "-O2", "-std=c++14", "-o", "sol"],
@@ -112,7 +112,7 @@ async def _run_pipeline_with_sem(sem, *args, **kwargs):
 
 async def batch_generate_and_run(gen_code, val_code, sol_file_id, count=5):
     # 🌟 核心修复：在当前事件循环中创建信号量，避免 EventLoop 绑定错误
-    sem = asyncio.Semaphore(5)
+    sem = asyncio.Semaphore(3)
 
     tasks = []
     for i in range(count):
