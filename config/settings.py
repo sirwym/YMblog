@@ -68,6 +68,7 @@ INSTALLED_APPS = [
     'upload.apps.UploadConfig',
     'core.apps.CoreConfig', # 放通用的逻辑
     "tools.apps.ToolsConfig",
+    "judge.apps.JudgeConfig",
 ]
 
 ######################################################################
@@ -462,7 +463,7 @@ UNFOLD = {
         ],
     },
 
-    "DASHBOARD_CALLBACK": "core.dashboard.dashboard_callback",
+    "DASHBOARD_CALLBACK": "judge_core.dashboard.dashboard_callback",
     "STYLES": [
         lambda request: static("admin/css/dashboard.css"),
         lambda request: static("css/katex.min.css"),
