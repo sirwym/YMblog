@@ -4,6 +4,9 @@ from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from unfold.contrib.constance.settings import UNFOLD_CONSTANCE_ADDITIONAL_FIELDS
 from datetime import datetime
+import sys
+import site
+import os
 
 import environ
 
@@ -610,3 +613,16 @@ CELERY_TIMEZONE = 'Asia/Shanghai'
 ######################################################################
 # 每次请求都重新保存 Session
 SESSION_SAVE_EVERY_REQUEST = True
+
+
+# =================================================
+# Judge Environment Configuration
+# =================================================
+
+# 宿主机（Django）实际写入的路径
+JUDGE_HOST_DIR = os.path.join(BASE_DIR, 'judge','judge_run_data')
+
+# 容器（Go-Judge）看到的路径
+JUDGE_CONTAINER_DIR = "/judge_run_data"
+
+

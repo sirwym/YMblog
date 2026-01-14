@@ -1,0 +1,32 @@
+# sandbox/mount.yaml
+mount:
+  - type: bind
+    source: /bin
+    target: /bin
+    readonly: true
+  - type: bind
+    source: /lib
+    target: /lib
+    readonly: true
+  - type: bind
+    source: /usr
+    target: /usr
+    readonly: true
+  # 静态资源挂载 (Driver)
+  - type: bind
+    source: /opt/assets
+    target: /assets
+    readonly: true
+
+  # 临时目录
+  - type: tmpfs
+    target: /w
+    data: size=128m
+  - type: tmpfs
+    target: /tmp
+    data: size=128m
+
+  # 判题运行数据（可写）
+  - type: bind
+    source: /judge_run_data
+    target: /judge_run_data

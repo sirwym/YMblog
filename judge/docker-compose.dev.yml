@@ -1,0 +1,15 @@
+services:
+  go-judge:
+    container_name: go-judge
+    build:
+      context: .
+      dockerfile: mac_docker/Dockerfile
+    image: go-judge-mac:dev
+    privileged: true
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./judge_run_data:/judge_run_data
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    restart: unless-stopped
+

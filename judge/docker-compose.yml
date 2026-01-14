@@ -1,0 +1,14 @@
+services:
+  go-judge:
+    container_name: go-judge
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    image: go-judge:dev
+    privileged: true
+    ports:
+      - "5050:5050"
+    volumes:
+      # Django ↔ Go-Judge 共享任务目录
+      - ./judge_run_data:/judge_run_data
+    restart: unless-stopped
