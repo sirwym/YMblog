@@ -8,7 +8,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from judge.services import PythonRunnerService, CppRunnerService
-from judge.judge_core.adapter import GoJudgeAdapter
 
 
 async def test_python_simple():

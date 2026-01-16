@@ -53,3 +53,17 @@ docker compose up -d
 
 # 开发模式（覆盖）
 docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+
+
+
+## 现阶段judge实现
+    - 通过Dockerfile 创建基于ubuntu22.04的go-judge容器，并安装cyaron numpy等第三方库，实现 assets /opt/assets挂载
+    - 通过docker-compose 启动容器
+
+### 实现流程
+    - ai测试点judge实现
+        - ai生成的gen_code、val_code、sol_code 传入服务器写到 judge/judge_run_data/uuid/ 里， 
+        - judge_run_data挂载到docker容器的go-judge里，直接通过文件id访问，生成的测试点直接写入到 judge/judge_run_data/uuid/里
+        - judge/judge_run_data/uuid/ 会打成zip 方便前端下载
+    - 需要注意的是  go-judge的python 安装了cyaron numpy库， 还有/opt/assets/killer_templates 方便ai生成更稳定的gen.py val.py
+

@@ -466,7 +466,7 @@ UNFOLD = {
         ],
     },
 
-    "DASHBOARD_CALLBACK": "judge_core.dashboard.dashboard_callback",
+    "DASHBOARD_CALLBACK": "core.dashboard.dashboard_callback",
     "STYLES": [
         lambda request: static("admin/css/dashboard.css"),
         lambda request: static("css/katex.min.css"),
@@ -490,7 +490,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 GO_JUDGE_BASE_URL = env('GO_JUDGE_BASE_URL', default="http://localhost:5050")
 MEMORY_LIMIT_MB = env.int('MEMORY_LIMIT_MB', default=256)
 MEMORY_LIMIT_BYTES = MEMORY_LIMIT_MB * 1024 * 1024
-
+CXX_COMPILER = "C++14"
 
 ######################################################################
 # 日志 设置

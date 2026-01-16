@@ -52,6 +52,10 @@ def tool_dashboard(request):
 
 def cpp_runner(request):
     """C++工具运行页面"""
+    context = {
+        'compiler': settings.CXX_COMPILER,
+        'memory_limit': settings.MEMORY_LIMIT_MB
+    }
 
     # 1. 检查权限
     tool, allowed = check_tool_permission(request, 'cpp_runner')
@@ -60,37 +64,7 @@ def cpp_runner(request):
     if tool and not allowed:
         return render(request, "tools/lock_screen.html", {"tool": tool})
 
-    return render(request, "tools/cpp_runner.html")
-
-async def get_sys_info(request):
-    """获取编译器版本信息"""
-    try:
-        async with httpx.AsyncClient() as client:
-            payload = {
-                "cmd": [{
-                    "args": ["/usr/bin/g++", "--version"],
-                    "env": ["PATH=/usr/bin:/bin"],
-                    "files": [{"content": ""}, {"name": "stdout", "max": 1024}, {"name": "stderr", "max": 1024}],
-                    "cpuLimit": 1000000000,
-                    "memoryLimit": 64 * 1024 * 1024,
-                    "procLimit": 50
-                }]
-            }
-            res = await client.post(f"{settings.GO_JUDGE_BASE_URL}/run", json=payload)
-            data = res.json()[0]
-
-            # 解析第一行，例如 "g++ (Alpine 12.2.1_git20220924-r10) 12.2.1 ..."
-            raw_version = data['files']['stdout'].split('\n')[0]
-            # 提取版本号数字 (可选)
-            # version_match = re.search(r'g\+\+.*?(\d+\.\d+\.\d+)', raw_version)
-
-            return JsonResponse({
-                'compiler': raw_version,
-                'memory_limit': settings.MEMORY_LIMIT_MB
-            })
-    except Exception as e:
-        logger.exception(f"获取系统信息失败: {e}")
-        return JsonResponse({'compiler': 'G++ (未知版本)', 'memory_limit': settings.MEMORY_LIMIT_MB})
+    return render(request, "tools/cpp_runner.html", context=context)
 
 
 async def run_cpp_api(request):

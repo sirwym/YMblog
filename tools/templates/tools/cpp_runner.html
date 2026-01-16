@@ -38,17 +38,11 @@
                 theme: 'vs-dark',
                 useO2: true,
 
-                // 新增状态字段
-                sysInfo: { compiler: '检测中...', limit: '...' },
                 executionTime: null,
                 executionMemory: null,
                 resultStatus: null,
 
                 init() {
-                    // 1. 获取系统信息
-                    this.fetchSysInfo();
-
-                    // 2. 加载编辑器
                     if (window.monaco) { this.createEditor(); return; }
 
                     const script = document.createElement('script');
@@ -56,18 +50,6 @@
                     script.async = true;
                     script.onload = () => { this.configAndLoad(); };
                     document.body.appendChild(script);
-                },
-
-                // 新增：获取编译器版本
-                async fetchSysInfo() {
-                    try {
-                        const res = await fetch('{% url "tools:sys_info" %}');
-                        const data = await res.json();
-                        this.sysInfo.compiler = data.compiler;
-                        this.sysInfo.limit = data.memory_limit;
-                    } catch(e) {
-                        this.sysInfo.compiler = '连接服务器失败';
-                    }
                 },
 
                 configAndLoad() {
@@ -145,9 +127,9 @@
                     <span class="text-blue-500">C++</span> 编辑器
                 </h2>
                 <div class="text-xs opacity-60 pl-2 font-mono flex gap-2">
-                    <span x-text="sysInfo.compiler" class="truncate max-w-[200px]" title="编译器版本"></span>
+                    <span class="truncate max-w-[200px]">{{ compiler }}</span>
                     <span class="hidden md:inline">|</span>
-                    <span>Limit: <span x-text="sysInfo.limit"></span>MB</span>
+                    <span>Limit: {{ memory_limit }}MB</span>
                 </div>
             </div>
 

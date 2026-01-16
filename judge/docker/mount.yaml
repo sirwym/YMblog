@@ -1,4 +1,3 @@
-# sandbox/mount.yaml
 mount:
   - type: bind
     source: /bin
@@ -7,6 +6,10 @@ mount:
   - type: bind
     source: /lib
     target: /lib
+    readonly: true
+  - type: bind
+    source: /lib64
+    target: /lib64
     readonly: true
   - type: bind
     source: /usr
