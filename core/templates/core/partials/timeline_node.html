@@ -42,11 +42,13 @@
 
             <div class="flex flex-wrap gap-2 mt-4">
                 {% for tag in tags.split %}
-                    <span class="badge badge-sm border-0 font-medium
+                    <a href="{% url 'blog:post_list' %}?tag={{ tag }}">
+                            <span class="badge badge-sm border-0 font-medium
                         {% if type == 'primary' %} bg-primary/10 text-primary
                         {% else %} bg-secondary/10 text-secondary {% endif %}">
                         {{ tag }}
                     </span>
+                    </a>
                 {% endfor %}
             </div>
         </div>

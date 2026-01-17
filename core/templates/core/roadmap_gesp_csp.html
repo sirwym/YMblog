@@ -33,21 +33,21 @@
 
             <div class="space-y-8 pl-6 border-l-2 border-primary/20 ml-4 md:ml-8">
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 一级：编程启蒙" level="Grade 1" diff="⭐" tags="变量 输入输出 算术运算 逻辑判断" desc="掌握编程环境配置。理解变量概念，学会基本的输入输出 (cin/cout) 及基础逻辑 (if/else)。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 一级：编程启蒙（基础认知）" level="Grade 1" diff="⭐" tags="变量 输入输出 条件判断 循环结构 基本运算" desc="掌握顺序、循环、分支的简单程序结构，可以使用集成开发环境进行编程与调试，通过编程基础知识的学习，完成单一功能的程序设计。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 二级：逻辑控制" level="Grade 2" diff="⭐" tags="for循环 while循环 ASCII码 流程图" desc="学会指挥计算机做重复的事情。掌握多层循环嵌套，理解字符与整数的关系，能画出简单流程图。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 二级：逻辑控制（程序结构）" level="Grade 2" diff="⭐" tags="多层循环 多层分支 ASCII码 流程图 类型转换" desc="掌握程序基本设计，能够使用简单数学函数。可以独立完成包含分支语句、循环语句等比较综合的案例，可以使用分支循环嵌套结构。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 三级：批量数据" level="Grade 3" diff="⭐⭐" tags="一维数组 字符串 进制转换 位运算" desc="学会处理成百上千的数据。掌握数组操作，理解二进制/十六进制的核心概念与位运算基础。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 三级：数据与算法入门" level="Grade 3" diff="⭐⭐" tags="一维数组 字符串 进制转换 位运算 枚举算法 模拟算法" desc="掌握数据编码、进制转换、位运算等知识，掌握一维数组、字符串及函数的使用，能够独立使用模拟法、枚举法解决对应的算法问题。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 四级：模块化与排序" level="Grade 4" diff="⭐⭐" tags="函数 结构体 简单排序 算法复杂度" desc="学会封装代码。掌握 struct 结构体，理解冒泡/选择/插入排序及其时间复杂度 O(n²)。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 四级：模块化与基础算法" level="Grade 4" diff="⭐⭐" tags="函数 结构体 二维数组 递推 基础排序 文件操作" desc="掌握函数的定义、调用及函数参数传递的方法；掌握二维数组与多维数组的使用技巧；掌握常用排序算法、文件读写和异常处理的使用。能够解决递推相关问题。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 五级：算法入门" level="Grade 5" diff="⭐⭐⭐" tags="质数筛 高精度运算 简单递归 杨辉三角" desc="开始接触算法思维。掌握埃氏筛法找质数，学会处理超出 long long 范围的大整数计算。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 五级：算法与数据结构基础" level="Grade 5" diff="⭐⭐⭐" tags="初等数论 高精度 链表 二分算法 递归 贪心" desc="掌握初等数论，线性表的知识，二分法、分治法、贪心法的思想，完成指定功能的程序。C++掌握数组模拟高精度的运算。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 六级：综合应用" level="Grade 6" diff="⭐⭐⭐" tags="文件操作 sort排序 贪心算法 二分查找" desc="掌握文件读写 (freopen)。学会利用 sort 自定义排序解决复杂问题，初步掌握贪心与二分策略。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 六级：树与搜索 + 基础 DP" level="Grade 6" diff="⭐⭐⭐" is_hard=True tags="树结构 DFS BFS 栈与队列 动态规划 背包问题" desc="掌握树的基础知识，能够分辨不同的树，并根据不同的搜索算法进行遍历，掌握简单线性动态规划和简单背包问题。" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 七级：树与搜索" level="Grade 7" diff="⭐⭐⭐⭐" is_hard=True tags="树的遍历 BFS DFS 贪心进阶" desc="进入非线性数据结构。理解“树”的概念（深度/度/叶子），掌握广搜与深搜的遍历框架。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 七级：图与复杂动态规划（核心难点）" level="Grade 7" diff="⭐⭐⭐⭐" is_hard=True tags="图结构 二维DP LIS LCS DP优化 哈希表" desc="掌握图的定义与遍历相关算法，能使用二维动态规划、动态规划最值优化的知识完成复杂的动态规划算法" %}
 
-                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 八级：图与DP" level="Grade 8" diff="⭐⭐⭐⭐⭐" is_hard=True tags="图的遍历 最长上升子序列 背包问题 并查集" desc="GESP 最高级。掌握图的连通性，熟练运用动态规划解决 LIS、背包等经典模型。" %}
+                {% include "core/partials/timeline_node.html" with type="primary" title="GESP 八级：算法分析与优化（最高级）" level="Grade 8" diff="⭐⭐⭐⭐⭐" is_hard=True tags="排列与组合 杨辉三角 倍增法 最短路径 最小生成树 复杂度分析 算法优化" desc="GESP 最高级。掌握组合数学与高级图论算法，能够分析算法的时间与空间复杂度，对比不同算法方案，并完成针对性的算法优化。" %}
 
             </div>
         </div>
@@ -101,5 +101,6 @@
         </p>
     </div>
 
+</div>
 </div>
 {% endblock %}
