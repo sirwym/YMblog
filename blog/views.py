@@ -23,10 +23,16 @@ def post_list(request):
     paginator = Paginator(posts, 9)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
+    query_params = request.GET.copy()
+    if 'page' in query_params:
+        del query_params['page']
+    encoded_params = query_params.urlencode()
+
     context = {
         'posts': page_obj,
         'categories': Category.objects.annotate(post_count=Count('post')),  #  侧边栏分类列表
         'tags': Tag.objects.all(),             #  侧边栏标签列表
+        'base_query_params': encoded_params,
     }
 
     if request.htmx:

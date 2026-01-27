@@ -5,3 +5,6 @@ media/
 logs/
 .env
 db.sqlite3
+judge/judge_run_data/
+.DS_Store
+.idea
